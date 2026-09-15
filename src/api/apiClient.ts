@@ -54,7 +54,7 @@ class APIClient {
 		return this.request<T>({ ...config, method: "DELETE" });
 	}
 	request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
-		return axiosInstance.request<any, T>(config);
+		return axiosInstance.request(config) as Promise<T>;
 	}
 }
 
