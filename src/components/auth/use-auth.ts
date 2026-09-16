@@ -1,50 +1,48 @@
+import { useAuthorization } from "@/hooks/useAuthorization";
 import { useUserInfo, useUserToken } from "@/store/userStore";
+import type { PermissionCode } from "@/types/saas";
 
 /**
- * permission/role check hook
- * @param baseOn - check type: 'role' or 'permission'
- *
- * @example
- * // permission check
- * const { check, checkAny, checkAll } = useAuthCheck('permission');
- * check('user.create')
- * checkAny(['user.create', 'user.edit'])
- * checkAll(['user.create', 'user.edit'])
- *
- * @example
- * // role check
- * const { check, checkAny, checkAll } = useAuthCheck('role');
- * check('admin')
- * checkAny(['admin', 'editor'])
- * checkAll(['admin', 'editor'])
+ * Universal Permission / Role check hook
+ * Seamlessly integrates SaaS authorization and legacy checks
  */
 export const useAuthCheck = (baseOn: "role" | "permission" = "permission") => {
 	const { accessToken } = useUserToken();
 	const { permissions = [], roles = [] } = useUserInfo();
+	const { can, isOwner, isAdmin, isMember, isSuperAdmin, role } = useAuthorization();
 
-	// depends on baseOn to select resource pool
-	const resourcePool = baseOn === "role" ? roles : permissions;
-
-	// check if item exists
 	const check = (item: string): boolean => {
-		// if user is not logged in, return false
-		if (!accessToken) {
-			return false;
+		// 1. Check SaaS authorization engine
+		if (baseOn === "permission") {
+			if (can(item as PermissionCode)) {
+				return true;
+			}
+		} else if (baseOn === "role") {
+			if (isSuperAdmin && item === "SUPER_ADMIN") return true;
+			if (isOwner && item === "OWNER") return true;
+			if (isAdmin && item === "ADMIN") return true;
+			if (isMember && item === "MEMBER") return true;
+			if (role === item) return true;
 		}
-		return resourcePool.some((p) => p.code === item);
+
+		// 2. Fallback to legacy userStore permissions if accessToken exists
+		if (accessToken) {
+			const resourcePool = baseOn === "role" ? roles : permissions;
+			return resourcePool.some((p) => p.code === item);
+		}
+
+		return false;
 	};
 
-	// check if any item exists
 	const checkAny = (items: string[]) => {
-		if (items.length === 0) {
+		if (!items || items.length === 0) {
 			return true;
 		}
 		return items.some((item) => check(item));
 	};
 
-	// check if all items exist
 	const checkAll = (items: string[]) => {
-		if (items.length === 0) {
+		if (!items || items.length === 0) {
 			return true;
 		}
 		return items.every((item) => check(item));

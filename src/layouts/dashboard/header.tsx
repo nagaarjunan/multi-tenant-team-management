@@ -5,6 +5,8 @@ import AccountDropdown from "../components/account-dropdown";
 import BreadCrumb from "../components/bread-crumb";
 import NoticeButton from "../components/notice";
 import SettingButton from "../components/setting-button";
+import OrgSwitcher from "../components/org-switcher";
+import RoleTesterBar from "../components/role-tester-bar";
 
 interface HeaderProps {
 	leftSlot?: ReactNode;
@@ -17,18 +19,19 @@ export default function Header({ leftSlot }: HeaderProps) {
 			data-slot="slash-layout-header"
 			className={cn(
 				"sticky top-0 left-0 right-0 z-app-bar",
-				"flex items-center justify-between px-2 grow-0 shrink-0",
-				"bg-background/60 backdrop-blur-xl",
+				"flex items-center justify-between px-3 grow-0 shrink-0 gap-2",
+				"bg-background/80 backdrop-blur-xl border-b border-border/40",
 				"h-[var(--layout-header-height)] ",
 			)}
 		>
-			<div className="flex items-center">
+			<div className="flex items-center gap-3">
 				{leftSlot}
-
-				<div className="hidden md:block ml-4">{breadCrumb && <BreadCrumb />}</div>
+				<OrgSwitcher />
+				<div className="hidden lg:block ml-2">{breadCrumb && <BreadCrumb />}</div>
 			</div>
 
-			<div className="flex items-center gap-1">
+			<div className="flex items-center gap-2">
+				<RoleTesterBar />
 				<NoticeButton />
 				<SettingButton />
 				<AccountDropdown />

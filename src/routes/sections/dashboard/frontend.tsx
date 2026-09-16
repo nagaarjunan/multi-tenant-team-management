@@ -4,7 +4,38 @@ import { Component } from "./utils";
 
 export function getFrontendDashboardRoutes(): RouteObject[] {
 	const frontendDashboardRoutes: RouteObject[] = [
-		{ path: "workbench", element: Component("/pages/dashboard/workbench") },
+		// SaaS Core Execution & Workspace Routes
+		{ path: "workbench", element: Component("/pages/saas/dashboard") },
+		{ path: "dashboard", element: Component("/pages/saas/dashboard") },
+		{ path: "my-work", element: Component("/pages/saas/my-work") },
+		{ path: "tasks", element: Component("/pages/saas/tasks") },
+		{ path: "daily-execution", element: Component("/pages/saas/daily-execution") },
+		{ path: "blockers", element: Component("/pages/saas/blockers") },
+		{ path: "teams", element: Component("/pages/saas/teams") },
+		{ path: "products", element: Component("/pages/saas/products") },
+		{ path: "projects", element: Component("/pages/saas/projects") },
+		{ path: "reports", element: Component("/pages/saas/reports") },
+		{ path: "org-onboarding", element: Component("/pages/saas/org-creation") },
+
+		// SaaS Organization Settings Routes
+		{
+			path: "settings",
+			children: [
+				{ index: true, element: Component("/pages/saas/settings") },
+				{ path: "general", element: Component("/pages/saas/settings") },
+				{ path: "members", element: Component("/pages/saas/settings") },
+				{ path: "invitations", element: Component("/pages/saas/settings") },
+				{ path: "roles", element: Component("/pages/saas/settings") },
+				{ path: "security", element: Component("/pages/saas/settings") },
+				{ path: "billing", element: Component("/pages/saas/settings") },
+				{ path: "danger-zone", element: Component("/pages/saas/settings") },
+			],
+		},
+
+		// Super Admin Platform Console
+		{ path: "super-admin", element: Component("/pages/saas/super-admin") },
+
+		// System & Component Demo Routes
 		{ path: "analysis", element: Component("/pages/dashboard/analysis") },
 		{
 			path: "components",
@@ -60,48 +91,6 @@ export function getFrontendDashboardRoutes(): RouteObject[] {
 				{ path: "500", element: Component("/pages/sys/error/Page500") },
 			],
 		},
-		{
-			path: "menu_level",
-			children: [
-				{ index: true, element: <Navigate to="1a" replace /> },
-				{ path: "1a", element: Component("/pages/menu-level/menu-level-1a") },
-				{
-					path: "1b",
-					children: [
-						{ index: true, element: <Navigate to="2a" replace /> },
-						{ path: "2a", element: Component("/pages/menu-level/menu-level-1b/menu-level-2a") },
-						{
-							path: "2b",
-							children: [
-								{ index: true, element: <Navigate to="3a" replace /> },
-								{ path: "3a", element: Component("/pages/menu-level/menu-level-1b/menu-level-2b/menu-level-3a") },
-								{ path: "3b", element: Component("/pages/menu-level/menu-level-1b/menu-level-2b/menu-level-3b") },
-							],
-						},
-					],
-				},
-			],
-		},
-		{
-			path: "link",
-			children: [
-				{ index: true, element: <Navigate to="iframe" replace /> },
-				{ path: "iframe", element: Component("/pages/sys/others/link/iframe", { src: "https://ant.design/index-cn" }) },
-				{
-					path: "external-link",
-					element: Component("/pages/sys/others/link/external-link", { src: "https://ant.design/index-cn" }),
-				},
-			],
-		},
-		{
-			path: "permission",
-			children: [
-				{ index: true, element: Component("/pages/sys/others/permission") },
-				{ path: "page-test", element: Component("/pages/sys/others/permission/page-test") },
-			],
-		},
-		{ path: "calendar", element: Component("/pages/sys/others/calendar") },
-		{ path: "kanban", element: Component("/pages/sys/others/kanban") },
 		{ path: "blank", element: Component("/pages/sys/others/blank") },
 	];
 	return frontendDashboardRoutes;

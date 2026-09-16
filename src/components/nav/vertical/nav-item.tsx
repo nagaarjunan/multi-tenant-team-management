@@ -3,7 +3,6 @@ import useLocale from "@/locales/use-locale";
 import { TooltipContent } from "@/ui/tooltip";
 import { Tooltip } from "@/ui/tooltip";
 import { TooltipTrigger } from "@/ui/tooltip";
-import { TooltipProvider } from "@/ui/tooltip";
 import { cn } from "@/utils";
 import { NavItemRenderer } from "../components";
 import { navItemClasses, navItemStyles } from "../styles";
@@ -27,16 +26,14 @@ export function NavItem(item: NavItemProps) {
 
 				{/* Caption */}
 				{caption && (
-					<TooltipProvider>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<span style={navItemStyles.caption}>{t(caption)}</span>
-							</TooltipTrigger>
-							<TooltipContent side="top" align="start">
-								{t(caption)}
-							</TooltipContent>
-						</Tooltip>
-					</TooltipProvider>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span style={navItemStyles.caption}>{t(caption)}</span>
+						</TooltipTrigger>
+						<TooltipContent side="top" align="start">
+							{t(caption)}
+						</TooltipContent>
+					</Tooltip>
 				)}
 			</span>
 
