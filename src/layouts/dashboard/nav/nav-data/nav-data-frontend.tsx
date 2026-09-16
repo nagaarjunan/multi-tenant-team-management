@@ -9,14 +9,7 @@ import {
 	CalendarClock,
 	AlertOctagon,
 	BarChart3,
-	Settings,
 	ShieldAlert,
-	Building2,
-	UserPlus,
-	KeyRound,
-	ShieldCheck,
-	CreditCard,
-	Flame,
 } from "lucide-react";
 
 export const frontendNavData: NavProps["data"] = [
@@ -81,61 +74,6 @@ export const frontendNavData: NavProps["data"] = [
 				path: "/reports",
 				icon: <BarChart3 className="w-5 h-5" />,
 				auth: ["report.view"],
-			},
-		],
-	},
-	{
-		name: "Organization",
-		items: [
-			{
-				title: "Settings",
-				path: "/settings",
-				icon: <Settings className="w-5 h-5" />,
-				auth: ["org.settings.view"],
-				children: [
-					{
-						title: "General",
-						path: "/settings/general",
-						icon: <Building2 className="w-4 h-4" />,
-						auth: ["org.settings.view"],
-					},
-					{
-						title: "Members",
-						path: "/settings/members",
-						icon: <Users className="w-4 h-4" />,
-						auth: ["member.view"],
-					},
-					{
-						title: "Invitations",
-						path: "/settings/invitations",
-						icon: <UserPlus className="w-4 h-4" />,
-						auth: ["member.invite"],
-					},
-					{
-						title: "Roles & Access",
-						path: "/settings/roles",
-						icon: <KeyRound className="w-4 h-4" />,
-						auth: ["org.settings.view"],
-					},
-					{
-						title: "Security & Logs",
-						path: "/settings/security",
-						icon: <ShieldCheck className="w-4 h-4" />,
-						auth: ["org.security.view"],
-					},
-					{
-						title: "Billing & Plans",
-						path: "/settings/billing",
-						icon: <CreditCard className="w-4 h-4" />,
-						auth: ["org.billing.view"],
-					},
-					{
-						title: "Danger Zone",
-						path: "/settings/danger-zone",
-						icon: <Flame className="w-4 h-4 text-destructive" />,
-						auth: ["org.delete"],
-					},
-				],
 			},
 		],
 	},

@@ -7,6 +7,7 @@ import NoticeButton from "../components/notice";
 import SettingButton from "../components/setting-button";
 import OrgSwitcher from "../components/org-switcher";
 import RoleTesterBar from "../components/role-tester-bar";
+import UpgradeButton from "../components/upgrade-button";
 
 interface HeaderProps {
 	leftSlot?: ReactNode;
@@ -31,6 +32,7 @@ export default function Header({ leftSlot }: HeaderProps) {
 			</div>
 
 			<div className="flex items-center gap-2">
+				<UpgradeButton />
 				<RoleTesterBar />
 				<NoticeButton />
 				<SettingButton />

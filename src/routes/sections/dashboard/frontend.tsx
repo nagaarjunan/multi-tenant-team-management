@@ -15,6 +15,8 @@ export function getFrontendDashboardRoutes(): RouteObject[] {
 		{ path: "products", element: Component("/pages/saas/products") },
 		{ path: "projects", element: Component("/pages/saas/projects") },
 		{ path: "reports", element: Component("/pages/saas/reports") },
+		{ path: "subscription", element: Component("/pages/saas/subscription") },
+		{ path: "billing", element: Component("/pages/saas/subscription") },
 		{ path: "org-onboarding", element: Component("/pages/saas/org-creation") },
 
 		// SaaS Organization Settings Routes
