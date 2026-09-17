@@ -38,7 +38,7 @@ const useSettingStore = create<SettingStore>()(
 				accordion: false,
 				multiTab: false,
 				darkSidebar: false,
-				fontFamily: FontFamilyPreset.openSans,
+				fontFamily: FontFamilyPreset.inter,
 				fontSize: Number(typographyTokens.fontSize.sm),
 				direction: "ltr",
 			},

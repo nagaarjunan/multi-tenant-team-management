@@ -13,10 +13,10 @@ export default function UpgradeButton() {
 		<Button
 			onClick={() => navigate("/subscription")}
 			size="sm"
-			className={`h-8 px-2.5 sm:px-3 text-xs font-bold gap-1.5 rounded-lg transition-all shadow-xs ${
+			className={`h-9 px-3 text-xs font-semibold gap-1.5 rounded-md transition-all ${
 				isEnterprise
 					? "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
-					: "bg-gradient-to-r from-amber-500 via-rose-500 to-primary text-white hover:opacity-90 hover:shadow-md animate-gradient"
+					: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
 			}`}
 		>
 			{isEnterprise ? (

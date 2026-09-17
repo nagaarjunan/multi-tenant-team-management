@@ -3,11 +3,11 @@ import { ThemeColorPresets } from "#/enum";
 
 export const presetsColors = {
 	[ThemeColorPresets.Default]: {
-		lighter: "#C8FAD6",
-		light: "#5BE49B",
-		default: "#00A76F",
-		dark: "#007867",
-		darker: "#004B50",
+		lighter: "#EAF0FF",
+		light: "#3157E8",
+		default: "#0636D6",
+		dark: "#052DB8",
+		darker: "#021B78",
 	},
 	[ThemeColorPresets.Cyan]: {
 		lighter: "#CCF4FE",
@@ -85,21 +85,21 @@ export const paletteColors = {
 		darker: "#003768",
 	},
 	gray: {
-		"100": "#F9FAFB",
-		"200": "#F4F6F8",
-		"300": "#DFE3E8",
-		"400": "#C4CDD5",
-		"500": "#919EAB",
-		"600": "#637381",
-		"700": "#454F5B",
-		"800": "#1C252E",
-		"900": "#141A21",
+		"100": "#F8FAFC",
+		"200": "#F1F5F9",
+		"300": "#E2E8F0",
+		"400": "#CBD5E1",
+		"500": "#94A3B8",
+		"600": "#64748B",
+		"700": "#475569",
+		"800": "#0F172A",
+		"900": "#020617",
 	},
 };
 
 export const commonColors = {
 	white: "#FFFFFF",
-	black: "#09090B",
+	black: "#0F172A",
 };
 
 export const actionColors = {
@@ -120,9 +120,9 @@ export const lightColorTokens = {
 		disabled: paletteColors.gray[500],
 	},
 	background: {
-		default: commonColors.white,
+		default: "#F8FAFC",
 		paper: commonColors.white,
-		neutral: paletteColors.gray[200],
+		neutral: "#F1F5F9",
 	},
 };
 

@@ -21,11 +21,14 @@
   ::backdrop,
   ::file-selector-button {
     /* https://tailwindcss.com/docs/upgrade-guide#default-border-color */
-    border-color: rgba(var(--colors-palette-gray-500Channel) / var(--opacity-border)) ;
+    border-color: rgba(var(--colors-palette-gray-300Channel) / var(--opacity-border)) ;
   }
 
   body {
     background-color: var(--background);
+    color: var(--foreground);
+    font-family: "Inter Variable", sans-serif;
+    font-feature-settings: "cv11" 1, "ss01" 1;
   }
 
 }
@@ -65,14 +68,14 @@
 /* Shadcn UI Light Theme */
 :root {
   --radius: 0.5rem;
-  --background: var(--colors-common-white);
+  --background: var(--colors-background-default);
   --foreground: var(--colors-common-black);
   --card: var(--colors-common-white);
   --card-foreground: var(--colors-common-black);
   --popover: var(--colors-common-white);
   --popover-foreground: var(--colors-common-black);
   --primary: var(--colors-palette-primary-default);
-  --primary-foreground: var(--colors-palette-primary-lighter);
+  --primary-foreground: var(--colors-common-white);
   --secondary:var(--colors-palette-gray-200);
   --secondary-foreground: var(--colors-palette-gray-600);
   --muted: var(--colors-palette-gray-200);
@@ -80,18 +83,18 @@
   --accent: var(--colors-palette-gray-200);
   --accent-foreground: var(--colors-palette-gray-600);
   --destructive: var(--colors-palette-error-default);
-  --border: rgba(var(--colors-palette-gray-500Channel)/ var(--opacity-border));
-  --input: rgba(var(--colors-palette-gray-500Channel)/ var(--opacity-border));
+  --border: rgba(var(--colors-palette-gray-300Channel)/ var(--opacity-border));
+  --input: rgba(var(--colors-palette-gray-300Channel)/ var(--opacity-border));
   --ring: var(--colors-palette-primary-default);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: var(--colors-palette-gray-200);
+  --sidebar: var(--colors-common-white);
   --sidebar-foreground: var(--colors-palette-gray-800);
   --sidebar-primary: var(--colors-palette-primary-default);
-  --sidebar-primary-foreground: var(--colors-palette-primary-lighter);
+  --sidebar-primary-foreground: var(--colors-common-white);
   --sidebar-accent: var(--colors-palette-gray-200);
   --sidebar-accent-foreground: var(--colors-palette-gray-800);
   --sidebar-border: var(--colors-palette-gray-200);
