@@ -23,12 +23,12 @@ import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
 import { Badge } from "@/ui/badge";
-import { Building2, Check, ChevronDown, Globe, Plus, Sparkles } from "lucide-react";
+import { Building2, Check, ChevronDown, Globe, Plus, Sparkles, User } from "lucide-react";
 import { toast } from "sonner";
 import type { PlanTier } from "@/types/saas";
 
 export default function OrgSwitcher() {
-	const { organization, userOrganizations, switchOrganization } = useAuthorization();
+	const { user, organization, userOrganizations, isPersonalWorkspace, switchWorkspace } = useAuthorization();
 	const createOrganization = useSaaSStore((s) => s.createOrganization);
 	const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -85,7 +85,7 @@ export default function OrgSwitcher() {
 			planStatus: "active",
 		});
 
-		toast.success(`Organization '${newOrg.name}' created successfully!`);
+		toast.success(`Organization '${newOrg.name}' created! Switched to Organization Workspace.`);
 		setCreateModalOpen(false);
 		setOrgName("");
 	};
@@ -110,38 +110,67 @@ export default function OrgSwitcher() {
 						className="flex items-center gap-2.5 px-3 py-1.5 h-9 bg-card/80 backdrop-blur-sm border-border/80 hover:bg-accent hover:text-accent-foreground rounded-lg transition-all shadow-xs"
 					>
 						<div className="flex items-center justify-center w-5 h-5 rounded-md bg-primary/10 text-primary shrink-0">
-							<Building2 className="w-3.5 h-3.5" />
+							{isPersonalWorkspace ? <User className="w-3.5 h-3.5" /> : <Building2 className="w-3.5 h-3.5" />}
 						</div>
 						<div className="flex items-center gap-1.5 text-left max-w-[150px] sm:max-w-[200px] truncate">
 							<span className="font-semibold text-xs sm:text-sm tracking-tight truncate">
-								{organization?.name || "Select Organization"}
+								{isPersonalWorkspace ? "Personal Workspace" : organization?.name || "Select Organization"}
 							</span>
 							<Badge
-								variant={getPlanBadgeVariant(organization?.plan || "starter")}
+								variant={isPersonalWorkspace ? "secondary" : getPlanBadgeVariant(organization?.plan || "starter")}
 								className="text-[10px] px-1.5 py-0 h-4 uppercase font-semibold hidden md:inline-flex"
 							>
-								{organization?.plan}
+								{isPersonalWorkspace ? "Personal" : organization?.plan}
 							</Badge>
 						</div>
 						<ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0 opacity-70" />
 					</Button>
 				</DropdownMenuTrigger>
 
-				<DropdownMenuContent className="w-64 p-1.5" align="start">
+				<DropdownMenuContent className="w-68 p-1.5" align="start">
+					{/* Personal Workspace Section */}
+					<DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 py-1 tracking-wider uppercase">
+						Personal Workspace
+					</DropdownMenuLabel>
+					<DropdownMenuItem
+						onClick={() => {
+							switchWorkspace("personal");
+							toast.success("Switched to Personal Workspace");
+						}}
+						className="flex items-center justify-between px-2.5 py-2 cursor-pointer rounded-md focus:bg-accent mb-1"
+					>
+						<div className="flex items-center gap-2.5 min-w-0">
+							<div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold text-xs shrink-0">
+								<User className="w-3.5 h-3.5" />
+							</div>
+							<div className="flex flex-col min-w-0">
+								<span className={`text-xs truncate ${isPersonalWorkspace ? "font-bold text-foreground" : "font-medium text-foreground/80"}`}>
+									Personal Workspace
+								</span>
+								<span className="text-[10px] text-muted-foreground">
+									{user?.name}'s private projects & tasks
+								</span>
+							</div>
+						</div>
+						{isPersonalWorkspace && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+					</DropdownMenuItem>
+
+					<DropdownMenuSeparator />
+
+					{/* Organizations Section */}
 					<DropdownMenuLabel className="text-[11px] font-semibold text-muted-foreground px-2 py-1.5 tracking-wider uppercase flex items-center justify-between">
-						<span>Switch Tenant</span>
+						<span>Organization Workspaces</span>
 						<span className="text-[10px] lowercase font-normal">{userOrganizations.length} available</span>
 					</DropdownMenuLabel>
-					<DropdownMenuSeparator />
 
 					<DropdownMenuGroup>
 						{userOrganizations.map((org) => {
-							const isSelected = org.id === organization?.id;
+							const isSelected = !isPersonalWorkspace && org.id === organization?.id;
 							return (
 								<DropdownMenuItem
 									key={org.id}
 									onClick={() => {
-										switchOrganization(org.id);
+										switchWorkspace("organization", org.id);
 										toast.success(`Switched active tenant to ${org.name}`);
 									}}
 									className="flex items-center justify-between px-2.5 py-2 cursor-pointer rounded-md focus:bg-accent"

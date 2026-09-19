@@ -58,6 +58,63 @@ export interface OrgMembership {
 	status: "ACTIVE" | "INVITED" | "SUSPENDED";
 }
 
+export type WorkspaceType = "personal" | "organization";
+
+export interface TimeEntry {
+	id: string;
+	taskId: string;
+	projectId: string;
+	userId: string;
+	seconds: number;
+	date: string; // YYYY-MM-DD
+	note?: string;
+	createdAt: string;
+}
+
+export interface ActiveTimer {
+	taskId: string;
+	taskTitle: string;
+	projectId: string;
+	startedAt: number; // Date.now() timestamp
+	elapsedSeconds: number;
+	isRunning: boolean;
+}
+
+export interface ChatMessage {
+	id: string;
+	projectId: string;
+	userId: string;
+	content: string;
+	createdAt: string;
+	replyToId?: string;
+	attachments?: string[];
+	reactions?: Record<string, string[]>; // emoji -> userIds
+	isConvertedToTask?: boolean;
+	convertedTaskId?: string;
+}
+
+export interface ProjectFile {
+	id: string;
+	projectId: string;
+	name: string;
+	size: string;
+	type: string;
+	url: string;
+	uploadedBy: string;
+	uploadedAt: string;
+}
+
+export interface NotificationItem {
+	id: string;
+	userId: string;
+	type: "assignment" | "mention" | "comment" | "invitation" | "due_soon" | "overdue" | "blocker";
+	title: string;
+	message: string;
+	read: boolean;
+	createdAt: string;
+	link?: string;
+}
+
 export interface Team {
 	id: string;
 	orgId: string;
@@ -79,13 +136,16 @@ export interface Product {
 
 export interface Project {
 	id: string;
-	orgId: string;
-	productId: string;
+	workspaceType: WorkspaceType;
+	orgId?: string; // empty/undefined for personal workspace projects
+	productId?: string;
 	name: string;
 	description: string;
 	status: "PLANNING" | "ACTIVE" | "ON_HOLD" | "COMPLETED";
+	leadId?: string; // Project Lead responsibility
 	startDate: string;
 	targetDate: string;
+	dueDate?: string;
 	memberIds: string[];
 	createdAt: string;
 }
@@ -108,7 +168,8 @@ export interface TaskAttachment {
 
 export interface Task {
 	id: string;
-	orgId: string;
+	workspaceType?: WorkspaceType;
+	orgId?: string;
 	projectId: string;
 	teamId?: string;
 	title: string;
@@ -117,10 +178,14 @@ export interface Task {
 	priority: TaskPriority;
 	assigneeId?: string;
 	reporterId: string;
+	startDate?: string;
 	dueDate?: string;
 	labels: string[];
 	comments: TaskComment[];
 	attachments: TaskAttachment[];
+	trackedSeconds?: number;
+	timeEntries?: TimeEntry[];
+	blockerId?: string;
 	createdAt: string;
 	updatedAt: string;
 }

@@ -2,58 +2,99 @@ import { useState, useMemo } from "react";
 import { useAuthorization } from "@/hooks/useAuthorization";
 import { useSaaSStore } from "@/store/saasStore";
 import { Button } from "@/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
+import { Card } from "@/ui/card";
+
 import { Badge } from "@/ui/badge";
+
 import {
 	Briefcase,
 	CalendarClock,
 	CheckCircle2,
-	Sparkles,
+	Clock,
+	AlertOctagon,
+	Play,
+	Square,
+	ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { TaskStatus } from "@/types/saas";
+import { useNavigate } from "react-router";
+
 
 export default function MyWorkPage() {
-	const { user, organization } = useAuthorization();
+	const navigate = useNavigate();
+	const { user, organization, isPersonalWorkspace } = useAuthorization();
 	const tasks = useSaaSStore((s) => s.tasks);
-	const updateTaskStatus = useSaaSStore((s) => s.updateTaskStatus);
-	const dailyUpdates = useSaaSStore((s) => s.dailyUpdates);
-	const blockers = useSaaSStore((s) => s.blockers);
-	const teams = useSaaSStore((s) => s.teams);
 	const projects = useSaaSStore((s) => s.projects);
 
-	const [activeTab, setActiveTab] = useState("tasks");
+	const updateTaskStatus = useSaaSStore((s) => s.updateTaskStatus);
+	const startTimer = useSaaSStore((s) => s.startTimer);
+	const stopTimer = useSaaSStore((s) => s.stopTimer);
+	const activeTimer = useSaaSStore((s) => s.activeTimer);
 
-	// Filter work for current user and current org
+	const [filterView, setFilterView] = useState<
+		"assigned" | "due_today" | "high_priority" | "in_progress" | "blocked" | "completed"
+	>("assigned");
+
+	const todayStr = new Date().toISOString().split("T")[0];
+
+	// Filter tasks where user is assignee or reporter in current workspace
 	const myTasks = useMemo(() => {
-		return tasks.filter((t) => t.orgId === organization?.id && (t.assigneeId === user?.id || t.reporterId === user?.id));
-	}, [tasks, organization?.id, user?.id]);
+		return tasks.filter((t) => {
+			const matchesWorkspace = isPersonalWorkspace
+				? t.workspaceType === "personal"
+				: t.orgId === organization?.id;
+			const isMine = t.assigneeId === user.id || t.reporterId === user.id;
+			return matchesWorkspace && isMine;
+		});
+	}, [tasks, isPersonalWorkspace, organization?.id, user.id]);
 
-	const myDailyUpdates = useMemo(() => {
-		return dailyUpdates.filter((d) => d.orgId === organization?.id && d.userId === user?.id);
-	}, [dailyUpdates, organization?.id, user?.id]);
+	// Filter categories per PRD Section 16
+	const assignedTasks = useMemo(() => myTasks.filter((t) => t.status !== "DONE"), [myTasks]);
+	const dueTodayTasks = useMemo(() => myTasks.filter((t) => t.dueDate === todayStr && t.status !== "DONE"), [myTasks, todayStr]);
+	const highPriorityTasks = useMemo(() => myTasks.filter((t) => (t.priority === "HIGH" || t.priority === "URGENT") && t.status !== "DONE"), [myTasks]);
+	const inProgressTasks = useMemo(() => myTasks.filter((t) => t.status === "IN_PROGRESS"), [myTasks]);
+	const blockedTasks = useMemo(() => myTasks.filter((t) => t.status === "BLOCKED"), [myTasks]);
+	const completedTasks = useMemo(() => myTasks.filter((t) => t.status === "DONE"), [myTasks]);
 
-	const myBlockers = useMemo(() => {
-		return blockers.filter((b) => b.orgId === organization?.id && (b.reporterId === user?.id || b.assigneeId === user?.id));
-	}, [blockers, organization?.id, user?.id]);
+	// Today's tracked time
+	const todaySeconds = useMemo(() => {
+		let total = 0;
+		myTasks.forEach((t) => {
+			(t.timeEntries || []).forEach((entry) => {
+				if (entry.date === todayStr && entry.userId === user.id) {
+					total += entry.seconds;
+				}
+			});
+		});
+		if (activeTimer && activeTimer.isRunning) {
+			total += activeTimer.elapsedSeconds;
+		}
+		return total;
+	}, [myTasks, todayStr, user.id, activeTimer]);
 
-	const myTeams = useMemo(() => {
-		return teams.filter((t) => t.orgId === organization?.id && (t.memberIds.includes(user?.id) || t.leadId === user?.id));
-	}, [teams, organization?.id, user?.id]);
+	const todayHours = (todaySeconds / 3600).toFixed(1);
 
-	const myProjects = useMemo(() => {
-		return projects.filter((p) => p.orgId === organization?.id && p.memberIds.includes(user?.id));
-	}, [projects, organization?.id, user?.id]);
-
-	const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
-		updateTaskStatus(taskId, newStatus);
-		toast.success(`Task status updated to ${newStatus}`);
-	};
+	// Display list based on selected filterView
+	const displayedTasks = useMemo(() => {
+		switch (filterView) {
+			case "due_today":
+				return dueTodayTasks;
+			case "high_priority":
+				return highPriorityTasks;
+			case "in_progress":
+				return inProgressTasks;
+			case "blocked":
+				return blockedTasks;
+			case "completed":
+				return completedTasks;
+			default:
+				return assignedTasks;
+		}
+	}, [filterView, assignedTasks, dueTodayTasks, highPriorityTasks, inProgressTasks, blockedTasks, completedTasks]);
 
 	return (
-		<div className="space-y-6 pb-12">
-			{/* Header */}
+		<div className="space-y-6 pb-16">
+			{/* Page Header */}
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
 					<div className="flex items-center gap-2">
@@ -63,273 +104,241 @@ export default function MyWorkPage() {
 						<h1 className="text-2xl font-bold tracking-tight text-foreground">My Work</h1>
 					</div>
 					<p className="text-xs text-muted-foreground mt-1">
-						Personalized workspace for {user?.name} in {organization?.name}
+						Personal execution cockpit for {user.name} ({isPersonalWorkspace ? "Personal Workspace" : organization?.name}).
 					</p>
+				</div>
+
+				<div className="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => navigate("/daily-execution")}
+						className="gap-1.5 text-xs h-8 border-primary/30 text-primary hover:bg-primary/10"
+					>
+						<CalendarClock className="w-3.5 h-3.5" /> Submit Daily Update
+					</Button>
 				</div>
 			</div>
 
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-				<TabsList className="grid grid-cols-4 w-full sm:w-[500px]">
-					<TabsTrigger value="tasks" className="text-xs">
-						Tasks ({myTasks.filter((t) => t.status !== "DONE").length})
-					</TabsTrigger>
-					<TabsTrigger value="standups" className="text-xs">
-						Standups ({myDailyUpdates.length})
-					</TabsTrigger>
-					<TabsTrigger value="blockers" className="text-xs">
-						Blockers ({myBlockers.filter((b) => b.status !== "RESOLVED").length})
-					</TabsTrigger>
-					<TabsTrigger value="memberships" className="text-xs">
-						Teams & Projects
-					</TabsTrigger>
-				</TabsList>
-
-				{/* 1. Tasks Tab */}
-				<TabsContent value="tasks" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-base font-semibold">Assigned & Created Tasks</CardTitle>
-							<CardDescription className="text-xs">
-								You have permission to update status and edit tasks assigned to you.
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							{myTasks.length === 0 ? (
-								<div className="text-center py-12 text-muted-foreground text-xs">
-									<CheckCircle2 className="w-10 h-10 text-success mx-auto mb-2 opacity-80" />
-									<h3 className="font-semibold text-foreground text-sm">You're all caught up</h3>
-									<p className="mt-1">No tasks are currently assigned to you in {organization?.name}.</p>
-								</div>
-							) : (
-								<div className="space-y-3">
-									{myTasks.map((task) => {
-										const project = projects.find((p) => p.id === task.projectId);
-										const isAssignee = task.assigneeId === user?.id;
-
-										return (
-											<div
-												key={task.id}
-												className="p-4 rounded-xl border border-border/70 hover:border-primary/40 bg-card transition-all space-y-3 shadow-xs"
-											>
-												<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-													<div className="space-y-1">
-														<div className="flex items-center gap-2">
-															<span className="font-semibold text-sm text-foreground">{task.title}</span>
-															{isAssignee && (
-																<Badge variant="outline" className="text-[10px] bg-primary/5 text-primary border-primary/20">
-																	Assigned to you
-																</Badge>
-															)}
-														</div>
-														<p className="text-xs text-muted-foreground">{task.description}</p>
-													</div>
-
-													<div className="flex items-center gap-2 shrink-0">
-														<Badge
-															variant={
-																task.priority === "URGENT" || task.priority === "HIGH"
-																	? "destructive"
-																	: "secondary"
-															}
-															className="text-[10px] uppercase font-bold"
-														>
-															{task.priority}
-														</Badge>
-														<Badge
-															variant={
-																task.status === "DONE"
-																	? "success"
-																	: task.status === "IN_PROGRESS"
-																	? "info"
-																	: task.status === "BLOCKED"
-																	? "destructive"
-																	: "secondary"
-															}
-															className="text-[10px] uppercase font-semibold"
-														>
-															{task.status.replace("_", " ")}
-														</Badge>
-													</div>
-												</div>
-
-												{/* Quick Status Bar */}
-												<div className="flex flex-wrap items-center justify-between pt-2 border-t border-border/40 gap-2 text-xs text-muted-foreground">
-													<div className="flex items-center gap-3 text-[11px]">
-														<span>Project: <strong>{project?.name || "General"}</strong></span>
-														<span>•</span>
-														<span>Due: {task.dueDate || "No due date"}</span>
-													</div>
-
-													<div className="flex items-center gap-1">
-														<span className="text-[11px] mr-1">Change status:</span>
-														{(["TODO", "IN_PROGRESS", "BLOCKED", "DONE"] as TaskStatus[]).map((st) => (
-															<Button
-																key={st}
-																size="sm"
-																variant={task.status === st ? "default" : "outline"}
-																onClick={() => handleStatusChange(task.id, st)}
-																className={`h-7 px-2 text-[10px] uppercase font-medium ${
-																	task.status === st ? "pointer-events-none" : ""
-																}`}
-															>
-																{st.replace("_", " ")}
-															</Button>
-														))}
-													</div>
-												</div>
-											</div>
-										);
-									})}
-								</div>
-							)}
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				{/* 2. Standups Tab */}
-				<TabsContent value="standups" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-base font-semibold">Your Daily Standup Logs</CardTitle>
-							<CardDescription className="text-xs">
-								Historical daily execution updates submitted in timezone {organization?.timezone}
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							{myDailyUpdates.length === 0 ? (
-								<div className="text-center py-10 text-xs text-muted-foreground">
-									No standup entries logged yet. Visit the <strong>Daily Execution</strong> tab to post your update.
-								</div>
-							) : (
-								<div className="space-y-4">
-									{myDailyUpdates.map((upd) => (
-										<div key={upd.id} className="p-4 rounded-xl border border-border/60 bg-muted/10 space-y-3">
-											<div className="flex items-center justify-between">
-												<span className="font-semibold text-xs text-foreground flex items-center gap-1.5">
-													<CalendarClock className="w-4 h-4 text-primary" /> Date: {upd.date}
-												</span>
-												<Badge variant="success" className="text-[10px]">
-													{upd.status}
-												</Badge>
-											</div>
-
-											<div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-												<div className="p-2.5 rounded-lg bg-card border border-border/40 space-y-1">
-													<span className="text-[11px] font-semibold text-muted-foreground uppercase">Yesterday</span>
-													<p className="text-foreground">{upd.yesterday || "None"}</p>
-												</div>
-												<div className="p-2.5 rounded-lg bg-card border border-border/40 space-y-1">
-													<span className="text-[11px] font-semibold text-primary uppercase">Today</span>
-													<p className="text-foreground">{upd.today || "None"}</p>
-												</div>
-												<div className="p-2.5 rounded-lg bg-card border border-border/40 space-y-1">
-													<span className="text-[11px] font-semibold text-destructive uppercase">Blockers</span>
-													<p className="text-foreground">{upd.blockers || "None"}</p>
-												</div>
-											</div>
-										</div>
-									))}
-								</div>
-							)}
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				{/* 3. Blockers Tab */}
-				<TabsContent value="blockers" className="space-y-4">
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-base font-semibold">Your Reported Blockers</CardTitle>
-							<CardDescription className="text-xs">
-								Blockers you have reported or are assigned to investigate
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							{myBlockers.length === 0 ? (
-								<div className="text-center py-10 text-xs text-muted-foreground">
-									You have not reported any active blockers.
-								</div>
-							) : (
-								<div className="space-y-3">
-									{myBlockers.map((blocker) => (
-										<div key={blocker.id} className="p-3.5 rounded-xl border border-destructive/20 bg-destructive/5 space-y-2">
-											<div className="flex items-center justify-between">
-												<span className="font-semibold text-xs text-foreground">{blocker.title}</span>
-												<Badge variant={blocker.severity === "CRITICAL" ? "destructive" : "warning"} className="text-[10px]">
-													{blocker.severity}
-												</Badge>
-											</div>
-											<p className="text-xs text-muted-foreground">{blocker.description}</p>
-											<div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
-												<span>Status: <strong>{blocker.status}</strong></span>
-												<span>Reported: {new Date(blocker.createdAt).toLocaleDateString()}</span>
-											</div>
-										</div>
-									))}
-								</div>
-							)}
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				{/* 4. Teams & Projects */}
-				<TabsContent value="memberships" className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-sm font-semibold">Your Teams</CardTitle>
-								<CardDescription className="text-xs">Teams in which you participate</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								{myTeams.length === 0 ? (
-									<p className="text-xs text-muted-foreground">Not assigned to any team yet.</p>
-								) : (
-									myTeams.map((t) => {
-										const isLead = t.leadId === user?.id;
-										return (
-											<div key={t.id} className="p-3 rounded-lg border border-border/60 bg-muted/20 space-y-1">
-												<div className="flex items-center justify-between">
-													<span className="font-semibold text-xs">{t.name}</span>
-													{isLead && (
-														<Badge variant="default" className="text-[10px] gap-1">
-															<Sparkles className="w-2.5 h-2.5" /> Team Lead
-														</Badge>
-													)}
-												</div>
-												<p className="text-[11px] text-muted-foreground">{t.description}</p>
-											</div>
-										);
-									})
-								)}
-							</CardContent>
-						</Card>
-
-						<Card>
-							<CardHeader>
-								<CardTitle className="text-sm font-semibold">Your Assigned Projects</CardTitle>
-								<CardDescription className="text-xs">Projects where you have access</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								{myProjects.length === 0 ? (
-									<p className="text-xs text-muted-foreground">Not assigned to any project yet.</p>
-								) : (
-									myProjects.map((p) => (
-										<div key={p.id} className="p-3 rounded-lg border border-border/60 bg-muted/20 space-y-1">
-											<div className="flex items-center justify-between">
-												<span className="font-semibold text-xs">{p.name}</span>
-												<Badge variant="outline" className="text-[10px]">
-													{p.status}
-												</Badge>
-											</div>
-											<p className="text-[11px] text-muted-foreground">{p.description}</p>
-										</div>
-									))
-								)}
-							</CardContent>
-						</Card>
+			{/* Today's KPI Overview Cards */}
+			<div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+				<Card className="p-4 flex items-center justify-between bg-card border-border/80 shadow-2xs">
+					<div className="space-y-0.5">
+						<span className="text-[11px] font-semibold text-muted-foreground">Today's Tracked Time</span>
+						<div className="text-2xl font-bold font-mono text-primary">{todayHours} hrs</div>
 					</div>
-				</TabsContent>
-			</Tabs>
+					<div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+						<Clock className="w-5 h-5" />
+					</div>
+				</Card>
+
+				<Card className="p-4 flex items-center justify-between bg-card border-border/80 shadow-2xs">
+					<div className="space-y-0.5">
+						<span className="text-[11px] font-semibold text-muted-foreground">Active Work</span>
+						<div className="text-2xl font-bold">{inProgressTasks.length} in progress</div>
+					</div>
+					<div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+						<Play className="w-5 h-5 fill-current" />
+					</div>
+				</Card>
+
+				<Card className="p-4 flex items-center justify-between bg-card border-border/80 shadow-2xs">
+					<div className="space-y-0.5">
+						<span className="text-[11px] font-semibold text-muted-foreground">Blocked Items</span>
+						<div className={`text-2xl font-bold ${blockedTasks.length > 0 ? "text-destructive" : "text-foreground"}`}>
+							{blockedTasks.length} blocked
+						</div>
+					</div>
+					<div className="p-2.5 rounded-xl bg-destructive/10 text-destructive">
+						<AlertOctagon className="w-5 h-5" />
+					</div>
+				</Card>
+
+				<Card className="p-4 flex items-center justify-between bg-card border-border/80 shadow-2xs">
+					<div className="space-y-0.5">
+						<span className="text-[11px] font-semibold text-muted-foreground">Completed Work</span>
+						<div className="text-2xl font-bold text-success">{completedTasks.length} done</div>
+					</div>
+					<div className="p-2.5 rounded-xl bg-success/10 text-success">
+						<CheckCircle2 className="w-5 h-5" />
+					</div>
+				</Card>
+			</div>
+
+			{/* Filter Tabs matching PRD Section 16 */}
+			<div className="space-y-4">
+				<div className="flex flex-wrap items-center gap-1.5 p-1 bg-muted/60 rounded-xl max-w-2xl border border-border/60">
+					<Button
+						variant={filterView === "assigned" ? "default" : "ghost"}
+						size="sm"
+						onClick={() => setFilterView("assigned")}
+						className="h-7 text-xs rounded-lg px-3"
+					>
+						Assigned ({assignedTasks.length})
+					</Button>
+					<Button
+						variant={filterView === "due_today" ? "default" : "ghost"}
+						size="sm"
+						onClick={() => setFilterView("due_today")}
+						className="h-7 text-xs rounded-lg px-3"
+					>
+						Due Today ({dueTodayTasks.length})
+					</Button>
+					<Button
+						variant={filterView === "high_priority" ? "default" : "ghost"}
+						size="sm"
+						onClick={() => setFilterView("high_priority")}
+						className="h-7 text-xs rounded-lg px-3"
+					>
+						High Priority ({highPriorityTasks.length})
+					</Button>
+					<Button
+						variant={filterView === "in_progress" ? "default" : "ghost"}
+						size="sm"
+						onClick={() => setFilterView("in_progress")}
+						className="h-7 text-xs rounded-lg px-3"
+					>
+						In Progress ({inProgressTasks.length})
+					</Button>
+					<Button
+						variant={filterView === "blocked" ? "default" : "ghost"}
+						size="sm"
+						onClick={() => setFilterView("blocked")}
+						className="h-7 text-xs rounded-lg px-3 text-destructive"
+					>
+						Blocked ({blockedTasks.length})
+					</Button>
+					<Button
+						variant={filterView === "completed" ? "default" : "ghost"}
+						size="sm"
+						onClick={() => setFilterView("completed")}
+						className="h-7 text-xs rounded-lg px-3"
+					>
+						Completed ({completedTasks.length})
+					</Button>
+				</div>
+
+				{/* Task Cards List */}
+				<div className="space-y-3">
+					{displayedTasks.map((task) => {
+						const project = projects.find((p) => p.id === task.projectId);
+						const isTiming = activeTimer?.taskId === task.id;
+
+						return (
+							<Card
+								key={task.id}
+								className={`p-4 hover:border-primary/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs ${
+									task.status === "BLOCKED" ? "border-destructive/40 bg-destructive/5" : ""
+								}`}
+							>
+								<div className="space-y-1.5 min-w-0">
+									<div className="flex flex-wrap items-center gap-2">
+										<Badge variant="outline" className="text-[10px] font-bold text-primary border-primary/20">
+											{project?.name || "Project"}
+										</Badge>
+										<Badge
+											variant={
+												task.priority === "URGENT" || task.priority === "HIGH"
+													? "destructive"
+													: "secondary"
+											}
+											className="text-[9px] uppercase font-bold"
+										>
+											{task.priority}
+										</Badge>
+										<Badge
+											variant={
+												task.status === "DONE"
+													? "success"
+													: task.status === "BLOCKED"
+													? "destructive"
+													: "secondary"
+											}
+											className="text-[9px] uppercase font-semibold"
+										>
+											{task.status.replace("_", " ")}
+										</Badge>
+									</div>
+
+									<h3 className="font-semibold text-sm text-foreground">{task.title}</h3>
+									{task.description && (
+										<p className="text-xs text-muted-foreground line-clamp-1">{task.description}</p>
+									)}
+
+									<div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-1">
+										<span>Due: {task.dueDate || "No due date"}</span>
+										<span>•</span>
+										<span className="font-mono font-medium text-primary">
+											{task.trackedSeconds ? `${(task.trackedSeconds / 3600).toFixed(1)} hrs tracked` : "0.0 hrs"}
+										</span>
+									</div>
+								</div>
+
+								{/* Direct Action Buttons */}
+								<div className="flex items-center gap-2 shrink-0">
+									{isTiming ? (
+										<Button
+											size="sm"
+											variant="destructive"
+											onClick={() => {
+												stopTimer();
+												toast.success("Timer stopped and session recorded to task ledger.");
+											}}
+											className="h-8 text-xs gap-1.5"
+										>
+											<Square className="w-3.5 h-3.5 fill-current" /> Stop Timer
+										</Button>
+									) : (
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => {
+												startTimer(task.id);
+												toast.success(`Timer started for "${task.title}"`);
+											}}
+											className="h-8 text-xs gap-1.5 text-primary border-primary/30 hover:bg-primary/10"
+										>
+											<Play className="w-3.5 h-3.5 fill-current" /> Track Time
+										</Button>
+									)}
+
+									<Button
+										size="sm"
+										variant="ghost"
+										onClick={() => {
+											const nextStatus = task.status === "DONE" ? "IN_PROGRESS" : "DONE";
+											updateTaskStatus(task.id, nextStatus);
+											toast.success(`Task status updated to ${nextStatus}`);
+										}}
+										className="h-8 text-xs gap-1 text-muted-foreground hover:text-foreground"
+									>
+										<CheckCircle2 className="w-3.5 h-3.5" />
+										{task.status === "DONE" ? "Reopen" : "Mark Done"}
+									</Button>
+
+									<Button
+										size="sm"
+										variant="ghost"
+										onClick={() => navigate(`/projects/${task.projectId}?tab=board`)}
+										className="h-8 text-xs text-muted-foreground hover:text-foreground"
+										title="Open in Project Hub"
+									>
+										<ArrowRight className="w-3.5 h-3.5" />
+									</Button>
+								</div>
+							</Card>
+						);
+					})}
+
+					{displayedTasks.length === 0 && (
+						<Card className="border-dashed p-10 text-center text-muted-foreground">
+							<CheckCircle2 className="w-10 h-10 text-success mx-auto mb-2 opacity-80" />
+							<h4 className="font-semibold text-foreground text-sm">No tasks in this view</h4>
+							<p className="text-xs mt-1">You are all caught up for this category.</p>
+						</Card>
+					)}
+				</div>
+			</div>
 		</div>
 	);
 }

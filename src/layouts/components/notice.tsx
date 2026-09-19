@@ -13,9 +13,14 @@ import { Text } from "@/ui/typography";
 import { faker } from "@faker-js/faker";
 import { type CSSProperties, useState } from "react";
 
+import { useSaaSStore } from "@/store/saasStore";
+import { toast } from "sonner";
+
 export default function NoticeButton() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const [count, setCount] = useState(4);
+	const notifications = useSaaSStore((s) => s.notifications);
+	const markAllNotificationsRead = useSaaSStore((s) => s.markAllNotificationsRead);
+	const unreadCount = notifications.filter((n) => !n.read).length;
 
 	const style: CSSProperties = {
 		backdropFilter: "blur(20px)",
@@ -31,22 +36,25 @@ export default function NoticeButton() {
 				<Button variant="ghost" size="icon" className="rounded-full" onClick={() => setDrawerOpen(true)}>
 					<Icon icon="solar:bell-bing-bold-duotone" size={24} />
 				</Button>
-				<Badge variant="destructive" shape="circle" className="absolute -right-2 -top-2">
-					{count}
-				</Badge>
+				{unreadCount > 0 && (
+					<Badge variant="destructive" shape="circle" className="absolute -right-1 -top-1 text-[10px] h-4 min-w-4 px-1">
+						{unreadCount}
+					</Badge>
+				)}
 			</div>
 			<Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
 				<SheetContent side="right" className="sm:max-w-md p-0 [&>button]:hidden flex flex-col" style={style}>
-					<SheetHeader className="flex flex-row items-center justify-between p-4 h-16 shrink-0">
-						<SheetTitle>Notifications</SheetTitle>
+					<SheetHeader className="flex flex-row items-center justify-between p-4 h-16 shrink-0 border-b">
+						<SheetTitle className="text-base font-bold">Notifications</SheetTitle>
 						<Button
 							variant="ghost"
 							size="icon"
 							className="rounded-full text-primary"
 							onClick={() => {
-								setCount(0);
-								setDrawerOpen(false);
+								markAllNotificationsRead();
+								toast.success("All notifications marked as read");
 							}}
+							title="Mark all as read"
 						>
 							<Icon icon="solar:check-read-broken" size={20} />
 						</Button>
@@ -54,11 +62,25 @@ export default function NoticeButton() {
 					<div className="px-4 flex-1 overflow-hidden">
 						<NoticeTab />
 					</div>
-					<SheetFooter className="flex flex-row h-16 w-full items-center justify-between p-4 shrink-0">
-						<Button variant="outline" className="flex-1 mr-2">
-							Archive all
+					<SheetFooter className="flex flex-row h-14 w-full items-center justify-between p-3 shrink-0 border-t">
+						<Button
+							variant="outline"
+							size="sm"
+							className="flex-1 mr-2 text-xs"
+							onClick={() => setDrawerOpen(false)}
+						>
+							Close
 						</Button>
-						<Button className="flex-1 ml-2">Mark all as read</Button>
+						<Button
+							size="sm"
+							className="flex-1 ml-2 text-xs"
+							onClick={() => {
+								markAllNotificationsRead();
+								toast.success("All notifications marked as read");
+							}}
+						>
+							Mark all read
+						</Button>
 					</SheetFooter>
 				</SheetContent>
 			</Sheet>
@@ -67,6 +89,7 @@ export default function NoticeButton() {
 }
 
 function NoticeTab() {
+	const storeNotifications = useSaaSStore((s) => s.notifications);
 	const allNotifications = [
 		{
 			id: 1,
@@ -609,7 +632,31 @@ function NoticeTab() {
 
 			<TabsContent value="all" className="flex-1 overflow-hidden">
 				<ScrollArea className="h-full">
-					<div className="space-y-0">{allNotifications.map(renderNotification)}</div>
+					<div className="space-y-0">
+						{/* Real-time SaaS Store Notifications */}
+						{storeNotifications.map((notif) => (
+							<div
+								key={notif.id}
+								className={`flex items-start space-x-3 py-3 px-1 border-b border-border transition-colors ${
+									!notif.read ? "bg-primary/5" : ""
+								}`}
+							>
+								<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs shrink-0 mt-0.5">
+									<Icon icon="solar:bell-bing-bold-duotone" size={18} />
+								</div>
+								<div className="flex-1 min-w-0">
+									<div className="flex items-center justify-between gap-1">
+										<span className="font-semibold text-xs text-foreground truncate">{notif.title}</span>
+										<span className="text-[10px] text-muted-foreground shrink-0">
+											{new Date(notif.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+										</span>
+									</div>
+									<p className="text-[11px] text-muted-foreground mt-0.5">{notif.message}</p>
+								</div>
+							</div>
+						))}
+						{allNotifications.map(renderNotification)}
+					</div>
 				</ScrollArea>
 			</TabsContent>
 

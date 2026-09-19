@@ -14,6 +14,7 @@ export function getFrontendDashboardRoutes(): RouteObject[] {
 		{ path: "teams", element: Component("/pages/saas/teams") },
 		{ path: "products", element: Component("/pages/saas/products") },
 		{ path: "projects", element: Component("/pages/saas/projects") },
+		{ path: "projects/:id", element: Component("/pages/saas/projects/detail") },
 		{ path: "reports", element: Component("/pages/saas/reports") },
 		{ path: "subscription", element: Component("/pages/saas/subscription") },
 		{ path: "billing", element: Component("/pages/saas/subscription") },

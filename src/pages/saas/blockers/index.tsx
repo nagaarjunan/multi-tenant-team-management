@@ -28,18 +28,31 @@ import { toast } from "sonner";
 import type { Blocker, BlockerSeverity } from "@/types/saas";
 
 export default function BlockersPage() {
-	const { organization, activeOrgMembers, user, can } = useAuthorization();
+	const { organization, activeOrgMembers, user, isPersonalWorkspace, can } = useAuthorization();
 	const blockers = useSaaSStore((s) => s.blockers);
 	const tasks = useSaaSStore((s) => s.tasks);
 	const teams = useSaaSStore((s) => s.teams);
 	const users = useSaaSStore((s) => s.users);
 	const createBlocker = useSaaSStore((s) => s.createBlocker);
+	const reportTaskBlocker = useSaaSStore((s) => s.reportTaskBlocker);
 	const resolveBlocker = useSaaSStore((s) => s.resolveBlocker);
 	const escalateBlocker = useSaaSStore((s) => s.escalateBlocker);
 
-	// Filter blockers for active org
-	const orgBlockers = useMemo(() => blockers.filter((b) => b.orgId === organization?.id), [blockers, organization?.id]);
-	const orgTasks = useMemo(() => tasks.filter((t) => t.orgId === organization?.id), [tasks, organization?.id]);
+	// Filter blockers for active workspace
+	const orgBlockers = useMemo(() => {
+		if (isPersonalWorkspace) {
+			return blockers.filter((b) => b.reporterId === user.id || b.orgId === "personal" || !b.orgId);
+		}
+		return blockers.filter((b) => b.orgId === organization?.id);
+	}, [blockers, isPersonalWorkspace, user.id, organization?.id]);
+
+	const orgTasks = useMemo(() => {
+		if (isPersonalWorkspace) {
+			return tasks.filter((t) => t.workspaceType === "personal");
+		}
+		return tasks.filter((t) => t.orgId === organization?.id);
+	}, [tasks, isPersonalWorkspace, organization?.id]);
+
 	const orgTeams = useMemo(() => teams.filter((t) => t.orgId === organization?.id), [teams, organization?.id]);
 
 	// Modal States
@@ -61,24 +74,28 @@ export default function BlockersPage() {
 			toast.error("Please enter a blocker title");
 			return;
 		}
-		if (!organization || !user) return;
 
-		createBlocker({
-			orgId: organization.id,
-			title: title.trim(),
-			description: description.trim(),
-			taskId: selectedTaskId || undefined,
-			teamId: selectedTeamId || undefined,
-			reporterId: user.id,
-			assigneeId: assigneeId || undefined,
-			severity,
-			status: "OPEN",
-		});
+		if (selectedTaskId) {
+			reportTaskBlocker(selectedTaskId, title.trim(), description.trim(), severity);
+			toast.success("Blocker reported! Associated task marked as BLOCKED.");
+		} else {
+			createBlocker({
+				orgId: isPersonalWorkspace ? "personal" : organization?.id || "",
+				title: title.trim(),
+				description: description.trim(),
+				teamId: selectedTeamId || undefined,
+				reporterId: user.id,
+				assigneeId: assigneeId || undefined,
+				severity,
+				status: "OPEN",
+			});
+			toast.success("Blocker reported!");
+		}
 
-		toast.success(`Blocker reported!`);
 		setCreateModalOpen(false);
 		setTitle("");
 		setDescription("");
+		setSelectedTaskId("");
 	};
 
 	const handleResolve = () => {
