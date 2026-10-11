@@ -6,7 +6,7 @@ import MotionContainer from "@/components/animate/motion-container";
 import { getVariant } from "@/components/animate/variants";
 import { themeVars } from "@/theme/theme.css";
 
-const TEXT = "SlashAdmin";
+const TEXT = "Nexus";
 type Props = {
 	isText: boolean;
 	isMulti: boolean;

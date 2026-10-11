@@ -62,7 +62,7 @@ export const SEED_USERS: SaaSUser[] = [
 	{
 		id: "usr-superadmin",
 		name: "Alex Chen (Platform Admin)",
-		email: "alex.platform@slashsaas.com",
+		email: "alex.platform@nexusworkos.com",
 		avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=AlexPlatform",
 		platformRole: "SUPER_ADMIN",
 		title: "SaaS Platform Super Administrator",
@@ -152,21 +152,105 @@ export const SEED_ORGS: Organization[] = [
 
 // Seed Memberships
 export const SEED_MEMBERSHIPS: OrgMembership[] = [
-	{ id: "mem-1", orgId: "org-india", userId: "usr-tanaka", role: "OWNER", joinedAt: "2026-01-10T08:00:00Z", status: "ACTIVE" },
-	{ id: "mem-2", orgId: "org-india", userId: "usr-yuki", role: "ADMIN", joinedAt: "2026-01-12T09:00:00Z", status: "ACTIVE" },
-	{ id: "mem-3", orgId: "org-india", userId: "usr-priya", role: "MEMBER", joinedAt: "2026-01-15T10:00:00Z", status: "ACTIVE" },
-	{ id: "mem-4", orgId: "org-india", userId: "usr-ken", role: "MEMBER", joinedAt: "2026-02-01T11:00:00Z", status: "ACTIVE" },
+	{
+		id: "mem-1",
+		orgId: "org-india",
+		userId: "usr-tanaka",
+		role: "OWNER",
+		joinedAt: "2026-01-10T08:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-2",
+		orgId: "org-india",
+		userId: "usr-yuki",
+		role: "ADMIN",
+		joinedAt: "2026-01-12T09:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-3",
+		orgId: "org-india",
+		userId: "usr-priya",
+		role: "MEMBER",
+		joinedAt: "2026-01-15T10:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-4",
+		orgId: "org-india",
+		userId: "usr-ken",
+		role: "MEMBER",
+		joinedAt: "2026-02-01T11:00:00Z",
+		status: "ACTIVE",
+	},
 
-	{ id: "mem-5", orgId: "org-japan", userId: "usr-tanaka", role: "OWNER", joinedAt: "2026-02-01T09:30:00Z", status: "ACTIVE" },
-	{ id: "mem-6", orgId: "org-japan", userId: "usr-yuki", role: "ADMIN", joinedAt: "2026-02-02T10:00:00Z", status: "ACTIVE" },
-	{ id: "mem-7", orgId: "org-japan", userId: "usr-ken", role: "MEMBER", joinedAt: "2026-02-05T12:00:00Z", status: "ACTIVE" },
+	{
+		id: "mem-5",
+		orgId: "org-japan",
+		userId: "usr-tanaka",
+		role: "OWNER",
+		joinedAt: "2026-02-01T09:30:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-6",
+		orgId: "org-japan",
+		userId: "usr-yuki",
+		role: "ADMIN",
+		joinedAt: "2026-02-02T10:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-7",
+		orgId: "org-japan",
+		userId: "usr-ken",
+		role: "MEMBER",
+		joinedAt: "2026-02-05T12:00:00Z",
+		status: "ACTIVE",
+	},
 
-	{ id: "mem-8", orgId: "org-uk", userId: "usr-tanaka", role: "OWNER", joinedAt: "2025-11-15T11:00:00Z", status: "ACTIVE" },
-	{ id: "mem-9", orgId: "org-uk", userId: "usr-priya", role: "MEMBER", joinedAt: "2026-01-20T14:00:00Z", status: "ACTIVE" },
+	{
+		id: "mem-8",
+		orgId: "org-uk",
+		userId: "usr-tanaka",
+		role: "OWNER",
+		joinedAt: "2025-11-15T11:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-9",
+		orgId: "org-uk",
+		userId: "usr-priya",
+		role: "MEMBER",
+		joinedAt: "2026-01-20T14:00:00Z",
+		status: "ACTIVE",
+	},
 
-	{ id: "mem-10", orgId: "org-us", userId: "usr-yuki", role: "OWNER", joinedAt: "2026-03-01T14:00:00Z", status: "ACTIVE" },
-	{ id: "mem-11", orgId: "org-us", userId: "usr-tanaka", role: "ADMIN", joinedAt: "2026-03-02T15:00:00Z", status: "ACTIVE" },
-	{ id: "mem-12", orgId: "org-us", userId: "usr-ken", role: "MEMBER", joinedAt: "2026-03-03T16:00:00Z", status: "ACTIVE" },
+	{
+		id: "mem-10",
+		orgId: "org-us",
+		userId: "usr-yuki",
+		role: "OWNER",
+		joinedAt: "2026-03-01T14:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-11",
+		orgId: "org-us",
+		userId: "usr-tanaka",
+		role: "ADMIN",
+		joinedAt: "2026-03-02T15:00:00Z",
+		status: "ACTIVE",
+	},
+	{
+		id: "mem-12",
+		orgId: "org-us",
+		userId: "usr-ken",
+		role: "MEMBER",
+		joinedAt: "2026-03-03T16:00:00Z",
+		status: "ACTIVE",
+	},
 ];
 
 // Seed Teams
@@ -581,7 +665,8 @@ export const SEED_CHAT_MESSAGES: ChatMessage[] = [
 		id: "msg-1",
 		projectId: "proj-auth",
 		userId: "usr-priya",
-		content: "Good morning team! The RBAC permission matrix PR is up for review. Please check the tenant filter clauses.",
+		content:
+			"Good morning team! The RBAC permission matrix PR is up for review. Please check the tenant filter clauses.",
 		createdAt: "2026-09-16T08:30:00Z",
 		reactions: { "👍": ["usr-tanaka", "usr-yuki"] },
 	},
@@ -763,7 +848,13 @@ export interface SaaSStoreState {
 	// Chat Actions
 	sendChatMessage: (projectId: string, content: string, replyToId?: string, attachments?: string[]) => void;
 	deleteChatMessage: (messageId: string) => void;
-	convertChatMessageToTask: (messageId: string, taskTitle: string, assigneeId?: string, priority?: TaskPriority, dueDate?: string) => Task;
+	convertChatMessageToTask: (
+		messageId: string,
+		taskTitle: string,
+		assigneeId?: string,
+		priority?: TaskPriority,
+		dueDate?: string,
+	) => Task;
 	toggleChatReaction: (messageId: string, emoji: string) => void;
 
 	// File Actions
@@ -932,7 +1023,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 			updateOrganization: (orgId, updates) => {
 				const state = get();
 				set({
-					organizations: state.organizations.map((o) => (o.id === orgId ? { ...o, ...updates, updatedAt: new Date().toISOString() } : o)),
+					organizations: state.organizations.map((o) =>
+						o.id === orgId ? { ...o, ...updates, updatedAt: new Date().toISOString() } : o,
+					),
 				});
 			},
 
@@ -947,7 +1040,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 					return m;
 				});
 
-				const updatedOrgs = state.organizations.map((o) => (o.id === orgId ? { ...o, ownerId: newOwnerId, updatedAt: new Date().toISOString() } : o));
+				const updatedOrgs = state.organizations.map((o) =>
+					o.id === orgId ? { ...o, ownerId: newOwnerId, updatedAt: new Date().toISOString() } : o,
+				);
 
 				set({
 					organizations: updatedOrgs,
@@ -974,7 +1069,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 			changeMemberRole: (orgId, userId, newRole) => {
 				const state = get();
 				set({
-					memberships: state.memberships.map((m) => (m.orgId === orgId && m.userId === userId ? { ...m, role: newRole } : m)),
+					memberships: state.memberships.map((m) =>
+						m.orgId === orgId && m.userId === userId ? { ...m, role: newRole } : m,
+					),
 				});
 			},
 
@@ -982,8 +1079,12 @@ export const useSaaSStore = create<SaaSStoreState>()(
 				const state = get();
 				set({
 					memberships: state.memberships.filter((m) => !(m.orgId === orgId && m.userId === userId)),
-					teams: state.teams.map((t) => (t.orgId === orgId ? { ...t, memberIds: t.memberIds.filter((id) => id !== userId) } : t)),
-					projects: state.projects.map((p) => (p.orgId === orgId ? { ...p, memberIds: p.memberIds.filter((id) => id !== userId) } : p)),
+					teams: state.teams.map((t) =>
+						t.orgId === orgId ? { ...t, memberIds: t.memberIds.filter((id) => id !== userId) } : t,
+					),
+					projects: state.projects.map((p) =>
+						p.orgId === orgId ? { ...p, memberIds: p.memberIds.filter((id) => id !== userId) } : p,
+					),
 				});
 			},
 
@@ -1165,9 +1266,7 @@ export const useSaaSStore = create<SaaSStoreState>()(
 				const state = get();
 				set({
 					projects: state.projects.map((p) =>
-						p.id === projectId && !p.memberIds.includes(userId)
-							? { ...p, memberIds: [...p.memberIds, userId] }
-							: p,
+						p.id === projectId && !p.memberIds.includes(userId) ? { ...p, memberIds: [...p.memberIds, userId] } : p,
 					),
 				});
 			},
@@ -1248,7 +1347,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 			updateTask: (taskId, updates) => {
 				const state = get();
 				set({
-					tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t)),
+					tasks: state.tasks.map((t) =>
+						t.id === taskId ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t,
+					),
 				});
 			},
 
@@ -1292,7 +1393,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 				};
 
 				set({
-					tasks: state.tasks.map((t) => (t.id === taskId ? { ...t, comments: [...t.comments, newComment], updatedAt: new Date().toISOString() } : t)),
+					tasks: state.tasks.map((t) =>
+						t.id === taskId ? { ...t, comments: [...t.comments, newComment], updatedAt: new Date().toISOString() } : t,
+					),
 				});
 			},
 
@@ -1609,7 +1712,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 			escalateBlocker: (blockerId) => {
 				const state = get();
 				set({
-					blockers: state.blockers.map((b) => (b.id === blockerId ? { ...b, severity: "CRITICAL", updatedAt: new Date().toISOString() } : b)),
+					blockers: state.blockers.map((b) =>
+						b.id === blockerId ? { ...b, severity: "CRITICAL", updatedAt: new Date().toISOString() } : b,
+					),
 				});
 			},
 
@@ -1643,7 +1748,9 @@ export const useSaaSStore = create<SaaSStoreState>()(
 				};
 
 				set({
-					organizations: state.organizations.map((o) => (o.id === orgId ? { ...o, plan: newPlan, updatedAt: new Date().toISOString() } : o)),
+					organizations: state.organizations.map((o) =>
+						o.id === orgId ? { ...o, plan: newPlan, updatedAt: new Date().toISOString() } : o,
+					),
 					auditLogs: [log, ...state.auditLogs],
 				});
 			},

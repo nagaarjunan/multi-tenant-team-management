@@ -5,14 +5,7 @@ import { Button } from "@/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
 import { Badge } from "@/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/ui/avatar";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/ui/dialog";
 import { Input } from "@/ui/input";
 import { Label } from "@/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/select";
@@ -137,13 +130,10 @@ export default function OrganizationSettingsPage() {
 	// Filter invitations & logs for current org
 	const orgInvitations = useMemo(
 		() => invitations.filter((i) => i.orgId === organization?.id),
-		[invitations, organization?.id]
+		[invitations, organization?.id],
 	);
 
-	const orgLogs = useMemo(
-		() => auditLogs.filter((l) => l.orgId === organization?.id),
-		[auditLogs, organization?.id]
-	);
+	const orgLogs = useMemo(() => auditLogs.filter((l) => l.orgId === organization?.id), [auditLogs, organization?.id]);
 
 	const filteredMembers = useMemo(() => {
 		return activeOrgMembers.filter(({ user: u, membership: m }) => {
@@ -157,9 +147,7 @@ export default function OrganizationSettingsPage() {
 	}, [activeOrgMembers, memberSearch, roleFilter]);
 
 	const filteredInvitations = useMemo(() => {
-		return orgInvitations.filter((i) =>
-			i.email.toLowerCase().includes(invitationSearch.toLowerCase())
-		);
+		return orgInvitations.filter((i) => i.email.toLowerCase().includes(invitationSearch.toLowerCase()));
 	}, [orgInvitations, invitationSearch]);
 
 	const filteredAuditLogs = useMemo(() => {
@@ -261,7 +249,7 @@ export default function OrganizationSettingsPage() {
 
 	const handleCopyInviteLink = () => {
 		if (organization) {
-			navigator.clipboard.writeText(`https://app.slashsaas.com/invite/${organization.slug}?token=demo_${Date.now()}`);
+			navigator.clipboard.writeText(`https://app.nexusworkos.com/invite/${organization.slug}?token=demo_${Date.now()}`);
 			setCopiedInviteLink(true);
 			toast.success("Shareable invitation link copied to clipboard!");
 			setTimeout(() => setCopiedInviteLink(false), 2000);
@@ -292,7 +280,10 @@ export default function OrganizationSettingsPage() {
 		const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orgLogs, null, 2));
 		const downloadAnchor = document.createElement("a");
 		downloadAnchor.setAttribute("href", dataStr);
-		downloadAnchor.setAttribute("download", `audit-logs-${organization.slug}-${new Date().toISOString().slice(0, 10)}.json`);
+		downloadAnchor.setAttribute(
+			"download",
+			`audit-logs-${organization.slug}-${new Date().toISOString().slice(0, 10)}.json`,
+		);
 		document.body.appendChild(downloadAnchor);
 		downloadAnchor.click();
 		downloadAnchor.remove();
@@ -301,9 +292,33 @@ export default function OrganizationSettingsPage() {
 
 	// Mock Invoices
 	const mockInvoices = [
-		{ id: "INV-2026-009", date: "Sep 01, 2026", amount: organization?.currencySymbol + (organization?.plan === "enterprise" ? "19,999" : organization?.plan === "professional" ? "4,999" : "0"), status: "PAID", tier: organization?.plan },
-		{ id: "INV-2026-008", date: "Aug 01, 2026", amount: organization?.currencySymbol + (organization?.plan === "enterprise" ? "19,999" : organization?.plan === "professional" ? "4,999" : "0"), status: "PAID", tier: organization?.plan },
-		{ id: "INV-2026-007", date: "Jul 01, 2026", amount: organization?.currencySymbol + (organization?.plan === "enterprise" ? "19,999" : organization?.plan === "professional" ? "4,999" : "0"), status: "PAID", tier: organization?.plan },
+		{
+			id: "INV-2026-009",
+			date: "Sep 01, 2026",
+			amount:
+				organization?.currencySymbol +
+				(organization?.plan === "enterprise" ? "19,999" : organization?.plan === "professional" ? "4,999" : "0"),
+			status: "PAID",
+			tier: organization?.plan,
+		},
+		{
+			id: "INV-2026-008",
+			date: "Aug 01, 2026",
+			amount:
+				organization?.currencySymbol +
+				(organization?.plan === "enterprise" ? "19,999" : organization?.plan === "professional" ? "4,999" : "0"),
+			status: "PAID",
+			tier: organization?.plan,
+		},
+		{
+			id: "INV-2026-007",
+			date: "Jul 01, 2026",
+			amount:
+				organization?.currencySymbol +
+				(organization?.plan === "enterprise" ? "19,999" : organization?.plan === "professional" ? "4,999" : "0"),
+			status: "PAID",
+			tier: organization?.plan,
+		},
 	];
 
 	return (
@@ -328,7 +343,13 @@ export default function OrganizationSettingsPage() {
 							<div className="flex flex-wrap items-center gap-2.5">
 								<h1 className="text-2xl font-extrabold tracking-tight text-foreground">{organization?.name}</h1>
 								<Badge
-									variant={organization?.plan === "enterprise" ? "default" : organization?.plan === "professional" ? "info" : "secondary"}
+									variant={
+										organization?.plan === "enterprise"
+											? "default"
+											: organization?.plan === "professional"
+												? "info"
+												: "secondary"
+									}
 									className="uppercase font-bold text-[10px] tracking-wider px-2 py-0.5"
 								>
 									{organization?.plan} PLAN
@@ -346,12 +367,23 @@ export default function OrganizationSettingsPage() {
 									title="Click to copy Org ID"
 								>
 									<span>{organization?.id}</span>
-									{copiedOrgId ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3 opacity-60" />}
+									{copiedOrgId ? (
+										<Check className="w-3 h-3 text-emerald-500" />
+									) : (
+										<Copy className="w-3 h-3 opacity-60" />
+									)}
 								</button>
 								<span>•</span>
-								<span>Timezone: <strong>{organization?.timezone}</strong></span>
+								<span>
+									Timezone: <strong>{organization?.timezone}</strong>
+								</span>
 								<span>•</span>
-								<span>Currency: <strong>{organization?.currency} ({organization?.currencySymbol})</strong></span>
+								<span>
+									Currency:{" "}
+									<strong>
+										{organization?.currency} ({organization?.currencySymbol})
+									</strong>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -360,15 +392,21 @@ export default function OrganizationSettingsPage() {
 					<div className="flex items-center gap-3 self-start md:self-auto shrink-0">
 						<div className="flex flex-col items-center justify-center px-3.5 py-2 rounded-xl bg-card border border-border/80 shadow-xs">
 							<span className="text-[10px] uppercase font-bold text-muted-foreground">Members</span>
-							<span className="text-base font-extrabold text-foreground">{activeOrgMembers.length} / {memberLimit}</span>
+							<span className="text-base font-extrabold text-foreground">
+								{activeOrgMembers.length} / {memberLimit}
+							</span>
 						</div>
 						<div className="flex flex-col items-center justify-center px-3.5 py-2 rounded-xl bg-card border border-border/80 shadow-xs">
 							<span className="text-[10px] uppercase font-bold text-muted-foreground">Teams</span>
-							<span className="text-base font-extrabold text-foreground">{orgTeams.length} / {teamLimit}</span>
+							<span className="text-base font-extrabold text-foreground">
+								{orgTeams.length} / {teamLimit}
+							</span>
 						</div>
 						<div className="flex flex-col items-center justify-center px-3.5 py-2 rounded-xl bg-card border border-border/80 shadow-xs">
 							<span className="text-[10px] uppercase font-bold text-muted-foreground">Projects</span>
-							<span className="text-base font-extrabold text-foreground">{orgProjects.length} / {projectLimit}</span>
+							<span className="text-base font-extrabold text-foreground">
+								{orgProjects.length} / {projectLimit}
+							</span>
 						</div>
 					</div>
 				</div>
@@ -395,7 +433,9 @@ export default function OrganizationSettingsPage() {
 									<Building2 className="w-4 h-4" />
 									<span>General Profile</span>
 								</div>
-								<ChevronRight className={`w-3.5 h-3.5 opacity-60 ${activeSection === "general" ? "text-primary-foreground" : ""}`} />
+								<ChevronRight
+									className={`w-3.5 h-3.5 opacity-60 ${activeSection === "general" ? "text-primary-foreground" : ""}`}
+								/>
 							</button>
 
 							<button
@@ -410,7 +450,9 @@ export default function OrganizationSettingsPage() {
 									<Globe className="w-4 h-4" />
 									<span>Localization & Formats</span>
 								</div>
-								<ChevronRight className={`w-3.5 h-3.5 opacity-60 ${activeSection === "localization" ? "text-primary-foreground" : ""}`} />
+								<ChevronRight
+									className={`w-3.5 h-3.5 opacity-60 ${activeSection === "localization" ? "text-primary-foreground" : ""}`}
+								/>
 							</button>
 						</div>
 
@@ -468,7 +510,9 @@ export default function OrganizationSettingsPage() {
 									<KeyRound className="w-4 h-4" />
 									<span>Roles & RBAC Matrix</span>
 								</div>
-								<ChevronRight className={`w-3.5 h-3.5 opacity-60 ${activeSection === "rbac-matrix" ? "text-primary-foreground" : ""}`} />
+								<ChevronRight
+									className={`w-3.5 h-3.5 opacity-60 ${activeSection === "rbac-matrix" ? "text-primary-foreground" : ""}`}
+								/>
 							</button>
 
 							<button
@@ -483,7 +527,9 @@ export default function OrganizationSettingsPage() {
 									<ShieldCheck className="w-4 h-4" />
 									<span>Security & Audit Trails</span>
 								</div>
-								<ChevronRight className={`w-3.5 h-3.5 opacity-60 ${activeSection === "audit-logs" ? "text-primary-foreground" : ""}`} />
+								<ChevronRight
+									className={`w-3.5 h-3.5 opacity-60 ${activeSection === "audit-logs" ? "text-primary-foreground" : ""}`}
+								/>
 							</button>
 						</div>
 
@@ -505,7 +551,9 @@ export default function OrganizationSettingsPage() {
 									<CreditCard className="w-4 h-4" />
 									<span>Subscription & Plans</span>
 								</div>
-								<ChevronRight className={`w-3.5 h-3.5 opacity-60 ${activeSection === "billing" ? "text-primary-foreground" : ""}`} />
+								<ChevronRight
+									className={`w-3.5 h-3.5 opacity-60 ${activeSection === "billing" ? "text-primary-foreground" : ""}`}
+								/>
 							</button>
 
 							<button
@@ -520,7 +568,9 @@ export default function OrganizationSettingsPage() {
 									<Receipt className="w-4 h-4" />
 									<span>Invoices & Receipts</span>
 								</div>
-								<ChevronRight className={`w-3.5 h-3.5 opacity-60 ${activeSection === "invoices" ? "text-primary-foreground" : ""}`} />
+								<ChevronRight
+									className={`w-3.5 h-3.5 opacity-60 ${activeSection === "invoices" ? "text-primary-foreground" : ""}`}
+								/>
 							</button>
 						</div>
 
@@ -552,14 +602,18 @@ export default function OrganizationSettingsPage() {
 					<Card className="p-4 border-border/70 bg-card/60 shadow-xs space-y-3">
 						<div className="flex items-center justify-between">
 							<span className="text-xs font-bold text-foreground">Quota Utilization</span>
-							<Badge variant="outline" className="text-[10px] uppercase">{organization?.plan}</Badge>
+							<Badge variant="outline" className="text-[10px] uppercase">
+								{organization?.plan}
+							</Badge>
 						</div>
 
 						<div className="space-y-2.5">
 							<div className="space-y-1">
 								<div className="flex justify-between text-[11px]">
 									<span className="text-muted-foreground">Members</span>
-									<span className="font-semibold text-foreground">{activeOrgMembers.length} / {memberLimit}</span>
+									<span className="font-semibold text-foreground">
+										{activeOrgMembers.length} / {memberLimit}
+									</span>
 								</div>
 								<Progress value={memberUsagePercent} className="h-1.5" />
 							</div>
@@ -567,7 +621,9 @@ export default function OrganizationSettingsPage() {
 							<div className="space-y-1">
 								<div className="flex justify-between text-[11px]">
 									<span className="text-muted-foreground">Teams</span>
-									<span className="font-semibold text-foreground">{orgTeams.length} / {teamLimit}</span>
+									<span className="font-semibold text-foreground">
+										{orgTeams.length} / {teamLimit}
+									</span>
 								</div>
 								<Progress value={teamUsagePercent} className="h-1.5" />
 							</div>
@@ -575,7 +631,9 @@ export default function OrganizationSettingsPage() {
 							<div className="space-y-1">
 								<div className="flex justify-between text-[11px]">
 									<span className="text-muted-foreground">Projects</span>
-									<span className="font-semibold text-foreground">{orgProjects.length} / {projectLimit}</span>
+									<span className="font-semibold text-foreground">
+										{orgProjects.length} / {projectLimit}
+									</span>
 								</div>
 								<Progress value={projectUsagePercent} className="h-1.5" />
 							</div>
@@ -632,7 +690,7 @@ export default function OrganizationSettingsPage() {
 											<Label className="text-xs font-semibold">Organization URL Slug *</Label>
 											<div className="flex items-center">
 												<span className="inline-flex items-center h-9.5 px-3 rounded-l-md border border-r-0 border-input bg-muted text-muted-foreground text-xs font-mono">
-													app.slashsaas.com/
+													app.nexusworkos.com/
 												</span>
 												<Input
 													value={orgSlug}
@@ -648,14 +706,18 @@ export default function OrganizationSettingsPage() {
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 										<div className="space-y-1.5">
 											<Label className="text-xs font-semibold">Country / Territory</Label>
-											<Select value={country} onValueChange={(val) => {
-												setCountry(val);
-												if (val === "India") setCountryCode("IN");
-												else if (val === "Japan") setCountryCode("JP");
-												else if (val === "United Kingdom") setCountryCode("GB");
-												else if (val === "United States") setCountryCode("US");
-												else if (val === "Germany") setCountryCode("DE");
-											}} disabled={!can("org.settings.update")}>
+											<Select
+												value={country}
+												onValueChange={(val) => {
+													setCountry(val);
+													if (val === "India") setCountryCode("IN");
+													else if (val === "Japan") setCountryCode("JP");
+													else if (val === "United Kingdom") setCountryCode("GB");
+													else if (val === "United States") setCountryCode("US");
+													else if (val === "Germany") setCountryCode("DE");
+												}}
+												disabled={!can("org.settings.update")}
+											>
 												<SelectTrigger className="h-9.5 text-xs">
 													<SelectValue />
 												</SelectTrigger>
@@ -684,7 +746,9 @@ export default function OrganizationSettingsPage() {
 											</Avatar>
 											<div>
 												<h4 className="text-xs font-semibold text-foreground">Organization Avatar / Logo</h4>
-												<p className="text-[11px] text-muted-foreground">Auto-generated SVG avatar or custom tenant branding.</p>
+												<p className="text-[11px] text-muted-foreground">
+													Auto-generated SVG avatar or custom tenant branding.
+												</p>
 											</div>
 										</div>
 										<Button
@@ -724,7 +788,8 @@ export default function OrganizationSettingsPage() {
 										<Globe className="w-5 h-5 text-primary" /> Regional & Internationalization Settings
 									</CardTitle>
 									<CardDescription className="text-xs mt-0.5">
-										Configure timezone calculation, multi-currency reporting, and date-time formats for all team members.
+										Configure timezone calculation, multi-currency reporting, and date-time formats for all team
+										members.
 									</CardDescription>
 								</CardHeader>
 								<CardContent className="p-6">
@@ -753,7 +818,11 @@ export default function OrganizationSettingsPage() {
 												<Label className="text-xs font-semibold flex items-center gap-1.5">
 													<DollarSign className="w-3.5 h-3.5 text-muted-foreground" /> Primary Currency
 												</Label>
-												<Select value={currency} onValueChange={handleCurrencyChange} disabled={!can("org.settings.update")}>
+												<Select
+													value={currency}
+													onValueChange={handleCurrencyChange}
+													disabled={!can("org.settings.update")}
+												>
 													<SelectTrigger className="h-9.5 text-xs">
 														<SelectValue />
 													</SelectTrigger>
@@ -805,7 +874,11 @@ export default function OrganizationSettingsPage() {
 												<Label className="text-xs font-semibold flex items-center gap-1.5">
 													<SlidersHorizontal className="w-3.5 h-3.5 text-muted-foreground" /> Week Starts On
 												</Label>
-												<Select value={weekStart} onValueChange={(v) => setWeekStart(v as "MONDAY" | "SUNDAY")} disabled={!can("org.settings.update")}>
+												<Select
+													value={weekStart}
+													onValueChange={(v) => setWeekStart(v as "MONDAY" | "SUNDAY")}
+													disabled={!can("org.settings.update")}
+												>
 													<SelectTrigger className="h-9.5 text-xs">
 														<SelectValue />
 													</SelectTrigger>
@@ -825,16 +898,26 @@ export default function OrganizationSettingsPage() {
 											</div>
 											<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
 												<div className="p-2.5 rounded-lg bg-card border border-border/80">
-													<span className="text-[10px] text-muted-foreground uppercase font-semibold">Active Timezone</span>
+													<span className="text-[10px] text-muted-foreground uppercase font-semibold">
+														Active Timezone
+													</span>
 													<div className="font-bold text-foreground mt-0.5">{timezone}</div>
 												</div>
 												<div className="p-2.5 rounded-lg bg-card border border-border/80">
-													<span className="text-[10px] text-muted-foreground uppercase font-semibold">Formatted Price Sample</span>
-													<div className="font-bold text-foreground mt-0.5">{currencySymbol} 4,999.00 {currency}</div>
+													<span className="text-[10px] text-muted-foreground uppercase font-semibold">
+														Formatted Price Sample
+													</span>
+													<div className="font-bold text-foreground mt-0.5">
+														{currencySymbol} 4,999.00 {currency}
+													</div>
 												</div>
 												<div className="p-2.5 rounded-lg bg-card border border-border/80">
-													<span className="text-[10px] text-muted-foreground uppercase font-semibold">Sprint Calendar Start</span>
-													<div className="font-bold text-foreground mt-0.5">{weekStart === "MONDAY" ? "Monday" : "Sunday"}</div>
+													<span className="text-[10px] text-muted-foreground uppercase font-semibold">
+														Sprint Calendar Start
+													</span>
+													<div className="font-bold text-foreground mt-0.5">
+														{weekStart === "MONDAY" ? "Monday" : "Sunday"}
+													</div>
 												</div>
 											</div>
 										</div>
@@ -866,7 +949,11 @@ export default function OrganizationSettingsPage() {
 								</div>
 
 								{can("member.invite") && (
-									<Button size="sm" onClick={() => setInviteModalOpen(true)} className="gap-1.5 text-xs bg-primary hover:bg-primary/90 h-8.5">
+									<Button
+										size="sm"
+										onClick={() => setInviteModalOpen(true)}
+										className="gap-1.5 text-xs bg-primary hover:bg-primary/90 h-8.5"
+									>
 										<UserPlus className="w-3.5 h-3.5" /> Invite Member
 									</Button>
 								)}
@@ -937,7 +1024,9 @@ export default function OrganizationSettingsPage() {
 																			</Badge>
 																		)}
 																	</div>
-																	<div className="text-[10px] text-muted-foreground">{memberUser.title || "Team Member"}</div>
+																	<div className="text-[10px] text-muted-foreground">
+																		{memberUser.title || "Team Member"}
+																	</div>
 																</div>
 															</div>
 														</td>
@@ -950,8 +1039,8 @@ export default function OrganizationSettingsPage() {
 																	membership.role === "OWNER"
 																		? "default"
 																		: membership.role === "ADMIN"
-																		? "info"
-																		: "secondary"
+																			? "info"
+																			: "secondary"
 																}
 																className="text-[10px] uppercase font-bold px-2 py-0.5"
 															>
@@ -963,7 +1052,11 @@ export default function OrganizationSettingsPage() {
 															{userLedTeams.length > 0 ? (
 																<div className="flex flex-wrap gap-1">
 																	{userLedTeams.map((t) => (
-																		<Badge key={t.id} variant="warning" className="text-[9px] px-1.5 py-0 h-4 font-semibold">
+																		<Badge
+																			key={t.id}
+																			variant="warning"
+																			className="text-[9px] px-1.5 py-0 h-4 font-semibold"
+																		>
 																			★ Lead: {t.name}
 																		</Badge>
 																	))}
@@ -1041,12 +1134,20 @@ export default function OrganizationSettingsPage() {
 											onClick={handleCopyInviteLink}
 											className="gap-1.5 text-xs h-8.5"
 										>
-											{copiedInviteLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+											{copiedInviteLink ? (
+												<Check className="w-3.5 h-3.5 text-emerald-500" />
+											) : (
+												<Copy className="w-3.5 h-3.5" />
+											)}
 											Copy Magic Invite Link
 										</Button>
 
 										{can("member.invite") && (
-											<Button size="sm" onClick={() => setInviteModalOpen(true)} className="gap-1.5 text-xs bg-primary hover:bg-primary/90 h-8.5">
+											<Button
+												size="sm"
+												onClick={() => setInviteModalOpen(true)}
+												className="gap-1.5 text-xs bg-primary hover:bg-primary/90 h-8.5"
+											>
 												<Mail className="w-3.5 h-3.5" /> Send Invite
 											</Button>
 										)}
@@ -1068,7 +1169,9 @@ export default function OrganizationSettingsPage() {
 										<div className="p-12 text-center rounded-xl border border-dashed border-border/80 space-y-2">
 											<UserPlus className="w-8 h-8 text-muted-foreground/50 mx-auto" />
 											<div className="font-semibold text-xs text-foreground">No Invitations Found</div>
-											<p className="text-[11px] text-muted-foreground">Send an invite or copy the magic link above to add teammates.</p>
+											<p className="text-[11px] text-muted-foreground">
+												Send an invite or copy the magic link above to add teammates.
+											</p>
 										</div>
 									) : (
 										<div className="rounded-xl border border-border/70 overflow-hidden">
@@ -1100,8 +1203,8 @@ export default function OrganizationSettingsPage() {
 																		inv.status === "ACCEPTED"
 																			? "success"
 																			: inv.status === "PENDING"
-																			? "warning"
-																			: "destructive"
+																				? "warning"
+																				: "destructive"
 																	}
 																	className="text-[10px] font-semibold"
 																>
@@ -1159,7 +1262,8 @@ export default function OrganizationSettingsPage() {
 										<KeyRound className="w-5 h-5 text-primary" /> Built-in Role vs Responsibility Matrix
 									</CardTitle>
 									<CardDescription className="text-xs mt-0.5">
-										Architecture specification comparison: Customer Roles (OWNER, ADMIN, MEMBER), Platform Role (SUPER_ADMIN), and Team Responsibilities.
+										Architecture specification comparison: Customer Roles (OWNER, ADMIN, MEMBER), Platform Role
+										(SUPER_ADMIN), and Team Responsibilities.
 									</CardDescription>
 								</CardHeader>
 								<CardContent className="p-6 space-y-6">
@@ -1167,31 +1271,40 @@ export default function OrganizationSettingsPage() {
 									<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 										<div className="p-4 rounded-xl border border-primary/30 bg-primary/5 space-y-2">
 											<div className="flex items-center gap-2">
-												<Badge variant="default" className="text-xs font-bold">OWNER</Badge>
+												<Badge variant="default" className="text-xs font-bold">
+													OWNER
+												</Badge>
 												<span className="font-semibold text-xs text-foreground">Highest Customer Authority</span>
 											</div>
 											<p className="text-muted-foreground text-[11px]">
-												Full control over organization ownership, billing plans, promoting Admins, danger zone operations, and ownership transfer.
+												Full control over organization ownership, billing plans, promoting Admins, danger zone
+												operations, and ownership transfer.
 											</p>
 										</div>
 
 										<div className="p-4 rounded-xl border border-info/30 bg-info/5 space-y-2">
 											<div className="flex items-center gap-2">
-												<Badge variant="info" className="text-xs font-bold">ADMIN</Badge>
+												<Badge variant="info" className="text-xs font-bold">
+													ADMIN
+												</Badge>
 												<span className="font-semibold text-xs text-foreground">Operations Administrator</span>
 											</div>
 											<p className="text-muted-foreground text-[11px]">
-												Full operational authority over members, invitations, teams, products, projects, and task boards. Explicitly restricted from billing, promoting admins, and deletion.
+												Full operational authority over members, invitations, teams, products, projects, and task
+												boards. Explicitly restricted from billing, promoting admins, and deletion.
 											</p>
 										</div>
 
 										<div className="p-4 rounded-xl border border-border/60 bg-muted/20 space-y-2">
 											<div className="flex items-center gap-2">
-												<Badge variant="secondary" className="text-xs font-bold">MEMBER</Badge>
+												<Badge variant="secondary" className="text-xs font-bold">
+													MEMBER
+												</Badge>
 												<span className="font-semibold text-xs text-foreground">Individual Contributor</span>
 											</div>
 											<p className="text-muted-foreground text-[11px]">
-												Assigned work execution, daily standup submissions, blocker reporting, and assigned team execution.
+												Assigned work execution, daily standup submissions, blocker reporting, and assigned team
+												execution.
 											</p>
 										</div>
 									</div>
@@ -1211,8 +1324,12 @@ export default function OrganizationSettingsPage() {
 											</thead>
 											<tbody className="divide-y divide-border/40 text-[11px]">
 												<tr>
-													<td className="p-3 font-semibold text-foreground">Cross-Tenant Super Console & Audited Impersonation</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 font-semibold text-foreground">
+														Cross-Tenant Super Console & Audited Impersonation
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
@@ -1220,51 +1337,93 @@ export default function OrganizationSettingsPage() {
 												</tr>
 												<tr>
 													<td className="p-3 font-semibold text-foreground">Modify Billing & Subscription Plans</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 												</tr>
 												<tr>
 													<td className="p-3 font-semibold text-foreground">Promote / Demote Members to ADMIN</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 												</tr>
 												<tr>
 													<td className="p-3 font-semibold text-foreground">Invite New Teammates (MEMBER role)</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 												</tr>
 												<tr>
-													<td className="p-3 font-semibold text-foreground">Create & Manage Teams / Products / Projects</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 font-semibold text-foreground">
+														Create & Manage Teams / Products / Projects
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 													<td className="p-3 text-center text-muted-foreground">—</td>
 												</tr>
 												<tr>
-													<td className="p-3 font-semibold text-foreground">Assign Team Tasks & Manage Team Sprint Board</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 font-semibold text-foreground">
+														Assign Team Tasks & Manage Team Sprint Board
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 													<td className="p-3 text-center text-muted-foreground">Self/Team</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 												</tr>
 												<tr>
 													<td className="p-3 font-semibold text-foreground">Submit Daily Standup & Report Blockers</td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
-													<td className="p-3 text-center"><CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" /></td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
+													<td className="p-3 text-center">
+														<CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
+													</td>
 												</tr>
 											</tbody>
 										</table>
@@ -1288,12 +1447,7 @@ export default function OrganizationSettingsPage() {
 										</CardDescription>
 									</div>
 
-									<Button
-										variant="outline"
-										size="sm"
-										onClick={handleExportLogsJson}
-										className="gap-1.5 text-xs h-8.5"
-									>
+									<Button variant="outline" size="sm" onClick={handleExportLogsJson} className="gap-1.5 text-xs h-8.5">
 										<Download className="w-3.5 h-3.5" /> Export Audit Log JSON
 									</Button>
 								</CardHeader>
@@ -1344,17 +1498,13 @@ export default function OrganizationSettingsPage() {
 														<td className="p-3 text-muted-foreground font-mono text-[11px] whitespace-nowrap">
 															{new Date(log.timestamp).toLocaleString()}
 														</td>
-														<td className="p-3 font-semibold text-foreground whitespace-nowrap">
-															{log.actorName}
-														</td>
+														<td className="p-3 font-semibold text-foreground whitespace-nowrap">{log.actorName}</td>
 														<td className="p-3">
 															<Badge variant="outline" className="text-[10px] font-mono">
 																{log.action}
 															</Badge>
 														</td>
-														<td className="p-3 text-muted-foreground font-semibold">
-															{log.resourceType}
-														</td>
+														<td className="p-3 text-muted-foreground font-semibold">{log.resourceType}</td>
 														<td className="p-3 text-foreground">{log.details}</td>
 													</tr>
 												))}
@@ -1376,7 +1526,8 @@ export default function OrganizationSettingsPage() {
 											<CreditCard className="w-5 h-5 text-primary" /> Subscription & Plan Tier
 										</CardTitle>
 										<CardDescription className="text-xs mt-0.5">
-											Current Active Tier: <strong className="uppercase">{organization?.plan}</strong> ({organization?.currency})
+											Current Active Tier: <strong className="uppercase">{organization?.plan}</strong> (
+											{organization?.currency})
 										</CardDescription>
 									</div>
 
@@ -1403,7 +1554,9 @@ export default function OrganizationSettingsPage() {
 								<CardContent className="p-6 space-y-6">
 									<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 										{/* Starter Tier */}
-										<div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${organization?.plan === "starter" ? "border-primary/80 bg-primary/5 ring-2 ring-primary/20" : "border-border/70 bg-card hover:border-border"}`}>
+										<div
+											className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${organization?.plan === "starter" ? "border-primary/80 bg-primary/5 ring-2 ring-primary/20" : "border-border/70 bg-card hover:border-border"}`}
+										>
 											<div className="space-y-4">
 												<div className="flex items-center justify-between">
 													<h4 className="font-bold text-base text-foreground">Starter</h4>
@@ -1413,22 +1566,37 @@ export default function OrganizationSettingsPage() {
 													{organization?.currencySymbol}0
 													<span className="text-xs font-normal text-muted-foreground"> / month</span>
 												</div>
-												<p className="text-xs text-muted-foreground">Ideal for small early-stage teams getting started.</p>
+												<p className="text-xs text-muted-foreground">
+													Ideal for small early-stage teams getting started.
+												</p>
 												<Separator />
 												<ul className="text-xs text-muted-foreground space-y-2">
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> Up to 5 team members</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> 2 Active Teams</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> 5 Products & Projects</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> Basic Kanban Board</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> Up to 5 team members
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> 2 Active Teams
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> 5 Products & Projects
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> Basic Kanban Board
+													</li>
 												</ul>
 											</div>
 
 											<div className="pt-6">
 												{isOwner && organization?.plan !== "starter" && (
-													<Button size="sm" variant="outline" className="w-full text-xs" onClick={() => {
-														upgradePlan(organization!.id, "starter");
-														toast.success("Downgraded to Starter tier.");
-													}}>
+													<Button
+														size="sm"
+														variant="outline"
+														className="w-full text-xs"
+														onClick={() => {
+															upgradePlan(organization!.id, "starter");
+															toast.success("Downgraded to Starter tier.");
+														}}
+													>
 														Downgrade to Starter
 													</Button>
 												)}
@@ -1436,35 +1604,60 @@ export default function OrganizationSettingsPage() {
 										</div>
 
 										{/* Professional Tier */}
-										<div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between relative ${organization?.plan === "professional" ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-md" : "border-border/70 bg-card hover:border-border"}`}>
+										<div
+											className={`p-5 rounded-2xl border transition-all flex flex-col justify-between relative ${organization?.plan === "professional" ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-md" : "border-border/70 bg-card hover:border-border"}`}
+										>
 											<div className="space-y-4">
 												<div className="flex items-center justify-between">
 													<div className="flex items-center gap-1.5">
 														<h4 className="font-bold text-base text-foreground">Professional</h4>
-														<Badge variant="warning" className="text-[9px] px-1 py-0 uppercase font-bold">POPULAR</Badge>
+														<Badge variant="warning" className="text-[9px] px-1 py-0 uppercase font-bold">
+															POPULAR
+														</Badge>
 													</div>
 													{organization?.plan === "professional" && <Badge variant="default">Current Plan</Badge>}
 												</div>
 												<div className="text-3xl font-extrabold text-foreground">
-													{organization?.currencySymbol}{annualBilling ? (organization?.currency === "JPY" ? "3,999" : "3,999") : (organization?.currency === "JPY" ? "4,999" : "4,999")}
+													{organization?.currencySymbol}
+													{annualBilling
+														? organization?.currency === "JPY"
+															? "3,999"
+															: "3,999"
+														: organization?.currency === "JPY"
+															? "4,999"
+															: "4,999"}
 													<span className="text-xs font-normal text-muted-foreground"> / month</span>
 												</div>
-												<p className="text-xs text-muted-foreground">For scaling organizations needing analytics & export.</p>
+												<p className="text-xs text-muted-foreground">
+													For scaling organizations needing analytics & export.
+												</p>
 												<Separator />
 												<ul className="text-xs text-muted-foreground space-y-2">
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> Up to 25 team members</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> 10 Teams & 20 Projects</li>
-													<li className="flex items-center gap-2 font-medium text-foreground"><Sparkles className="w-3.5 h-3.5 text-primary" /> Report Export (CSV/PDF)</li>
-													<li className="flex items-center gap-2 font-medium text-foreground"><Sparkles className="w-3.5 h-3.5 text-primary" /> Audit Trail Logging</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> Up to 25 team members
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> 10 Teams & 20 Projects
+													</li>
+													<li className="flex items-center gap-2 font-medium text-foreground">
+														<Sparkles className="w-3.5 h-3.5 text-primary" /> Report Export (CSV/PDF)
+													</li>
+													<li className="flex items-center gap-2 font-medium text-foreground">
+														<Sparkles className="w-3.5 h-3.5 text-primary" /> Audit Trail Logging
+													</li>
 												</ul>
 											</div>
 
 											<div className="pt-6">
 												{isOwner && organization?.plan !== "professional" && (
-													<Button size="sm" className="w-full text-xs bg-primary hover:bg-primary/90" onClick={() => {
-														upgradePlan(organization!.id, "professional");
-														toast.success("Upgraded to Professional tier!");
-													}}>
+													<Button
+														size="sm"
+														className="w-full text-xs bg-primary hover:bg-primary/90"
+														onClick={() => {
+															upgradePlan(organization!.id, "professional");
+															toast.success("Upgraded to Professional tier!");
+														}}
+													>
 														Switch to Professional
 													</Button>
 												)}
@@ -1472,32 +1665,55 @@ export default function OrganizationSettingsPage() {
 										</div>
 
 										{/* Enterprise Tier */}
-										<div className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${organization?.plan === "enterprise" ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-md" : "border-border/70 bg-card hover:border-border"}`}>
+										<div
+											className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${organization?.plan === "enterprise" ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-md" : "border-border/70 bg-card hover:border-border"}`}
+										>
 											<div className="space-y-4">
 												<div className="flex items-center justify-between">
 													<h4 className="font-bold text-base text-foreground">Enterprise</h4>
 													{organization?.plan === "enterprise" && <Badge variant="default">Current Plan</Badge>}
 												</div>
 												<div className="text-3xl font-extrabold text-foreground">
-													{organization?.currencySymbol}{annualBilling ? (organization?.currency === "JPY" ? "15,999" : "15,999") : (organization?.currency === "JPY" ? "19,999" : "19,999")}
+													{organization?.currencySymbol}
+													{annualBilling
+														? organization?.currency === "JPY"
+															? "15,999"
+															: "15,999"
+														: organization?.currency === "JPY"
+															? "19,999"
+															: "19,999"}
 													<span className="text-xs font-normal text-muted-foreground"> / month</span>
 												</div>
-												<p className="text-xs text-muted-foreground">Unlimited capacity, dedicated SLA and custom SSO.</p>
+												<p className="text-xs text-muted-foreground">
+													Unlimited capacity, dedicated SLA and custom SSO.
+												</p>
 												<Separator />
 												<ul className="text-xs text-muted-foreground space-y-2">
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> Unlimited members & teams</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> Unlimited products & projects</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> SAML / Okta Single Sign-On</li>
-													<li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-emerald-500" /> Dedicated 99.99% SLA Support</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> Unlimited members & teams
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> Unlimited products & projects
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> SAML / Okta Single Sign-On
+													</li>
+													<li className="flex items-center gap-2">
+														<Check className="w-3.5 h-3.5 text-emerald-500" /> Dedicated 99.99% SLA Support
+													</li>
 												</ul>
 											</div>
 
 											<div className="pt-6">
 												{isOwner && organization?.plan !== "enterprise" && (
-													<Button size="sm" className="w-full text-xs bg-primary hover:bg-primary/90" onClick={() => {
-														upgradePlan(organization!.id, "enterprise");
-														toast.success("Upgraded to Enterprise tier!");
-													}}>
+													<Button
+														size="sm"
+														className="w-full text-xs bg-primary hover:bg-primary/90"
+														onClick={() => {
+															upgradePlan(organization!.id, "enterprise");
+															toast.success("Upgraded to Enterprise tier!");
+														}}
+													>
 														Upgrade to Enterprise
 													</Button>
 												)}
@@ -1585,7 +1801,8 @@ export default function OrganizationSettingsPage() {
 												<Shield className="w-4 h-4 text-warning" /> Transfer Primary Ownership
 											</div>
 											<p className="text-xs text-muted-foreground">
-												Select another active teammate to assume full OWNER privileges. Your role will be transitioned to ADMIN.
+												Select another active teammate to assume full OWNER privileges. Your role will be transitioned
+												to ADMIN.
 											</p>
 										</div>
 
@@ -1609,7 +1826,8 @@ export default function OrganizationSettingsPage() {
 												<AlertTriangle className="w-4 h-4 text-destructive" /> Permanently Delete Organization
 											</div>
 											<p className="text-xs text-muted-foreground">
-												Irrevocably delete <strong>{organization?.name}</strong>, all associated teams, task history, and audit records.
+												Irrevocably delete <strong>{organization?.name}</strong>, all associated teams, task history,
+												and audit records.
 											</p>
 										</div>
 
@@ -1742,7 +1960,8 @@ export default function OrganizationSettingsPage() {
 							<AlertTriangle className="w-5 h-5" /> Delete Organization
 						</DialogTitle>
 						<DialogDescription className="text-xs">
-							This action cannot be undone. All teams, products, sprint boards, daily updates, and audit trails will be permanently deleted.
+							This action cannot be undone. All teams, products, sprint boards, daily updates, and audit trails will be
+							permanently deleted.
 						</DialogDescription>
 					</DialogHeader>
 
