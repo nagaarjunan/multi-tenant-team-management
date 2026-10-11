@@ -10,11 +10,15 @@ const axiosInstance = axios.create({
 	baseURL: GLOBAL_CONFIG.apiBaseUrl,
 	timeout: 50000,
 	headers: { "Content-Type": "application/json;charset=utf-8" },
+	withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(
 	(config) => {
-		config.headers.Authorization = "Bearer Token";
+		const token = userStore.getState().userToken?.accessToken;
+		if (token) {
+			config.headers.Authorization = `Bearer ${token}`;
+		}
 		return config;
 	},
 	(error) => Promise.reject(error),

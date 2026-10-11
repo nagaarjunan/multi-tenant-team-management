@@ -8,34 +8,47 @@ import { DB_MENU, DB_PERMISSION, DB_ROLE, DB_ROLE_PERMISSION, DB_USER, DB_USER_R
 const signIn = http.post(`/api${UserApi.SignIn}`, async ({ request }) => {
 	const { username, password } = (await request.json()) as Record<string, string>;
 
-	const user = DB_USER.find((item) => item.username === username);
+	const query = (username || "").trim().toLowerCase();
 
-	if (!user || user.password !== password) {
-		return HttpResponse.json({
-			status: 10001,
-			message: "Incorrect username or password.",
-		});
+	let user = DB_USER.find(
+		(item) => item.username.toLowerCase() === query || (item.email && item.email.toLowerCase() === query),
+	);
+
+	if (!user) {
+		// Auto-register mock user for demo flexibility
+		const fallbackName = query.includes("@") ? query.split("@")[0] : query || "admin";
+		user = {
+			id: faker.string.uuid(),
+			username: fallbackName,
+			password: password || "demo1234",
+			email: query.includes("@") ? query : `${fallbackName}@nexus.com`,
+			avatar: faker.image.avatarGitHub(),
+		};
+		DB_USER.push(user);
 	}
-	// delete password
+
+	// Delete password
 	const { password: _, ...userWithoutPassword } = user;
 
-	// user role
-	const roles = DB_USER_ROLE.filter((item) => item.userId === user.id).map((item) =>
+	// User role
+	const roles = DB_USER_ROLE.filter((item) => item.userId === user?.id).map((item) =>
 		DB_ROLE.find((role) => role.id === item.roleId),
 	);
+	const finalRoles = roles.length > 0 ? roles : [DB_ROLE[0]];
 
-	// user permissions
-	const permissions = DB_ROLE_PERMISSION.filter((item) => roles.some((role) => role?.id === item.roleId)).map((item) =>
+	// User permissions
+	const permissions = DB_ROLE_PERMISSION.filter((item) => finalRoles.some((role) => role?.id === item?.roleId)).map((item) =>
 		DB_PERMISSION.find((permission) => permission.id === item.permissionId),
 	);
+	const finalPermissions = permissions.length > 0 ? permissions : DB_PERMISSION;
 
 	const menu = convertFlatToTree(DB_MENU);
 
 	return HttpResponse.json({
 		status: ResultStatus.SUCCESS,
-		message: "",
+		message: "Signed in successfully",
 		data: {
-			user: { ...userWithoutPassword, roles, permissions, menu },
+			user: { ...userWithoutPassword, roles: finalRoles, permissions: finalPermissions, menu },
 			accessToken: faker.string.uuid(),
 			refreshToken: faker.string.uuid(),
 		},
@@ -45,13 +58,17 @@ const signIn = http.post(`/api${UserApi.SignIn}`, async ({ request }) => {
 const signUp = http.post(`/api${UserApi.SignUp}`, async ({ request }) => {
 	const { username, password, email } = (await request.json()) as Record<string, string>;
 
-	let user = DB_USER.find((item) => item.username === username);
+	const query = (username || "").trim().toLowerCase();
+	let user = DB_USER.find(
+		(item) => item.username.toLowerCase() === query || (item.email && item.email.toLowerCase() === query),
+	);
+
 	if (!user) {
 		const newUser = {
 			id: faker.string.uuid(),
-			username,
-			password,
-			email: email || `${username}@nexus.com`,
+			username: username || "user",
+			password: password || "demo1234",
+			email: email || `${username || "user"}@nexus.com`,
 			avatar: faker.image.avatarGitHub(),
 		};
 		DB_USER.push(newUser);
