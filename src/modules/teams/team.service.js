@@ -1,77 +1,82 @@
-const mongoose = require('mongoose');
-const { teamRepository } = require('./team.repository');
+const { TeamModel } = require('./team.model');
+const AppError = require('../../utils/AppError');
 
-class TeamService {
-  constructor(teamRepo = teamRepository) {
-    this.teamRepo = teamRepo;
-  }
+const createTeam = async (organizationId, name, description, leaderId) => {
+  return TeamModel.create({
+    name,
+    description,
+    organizationId,
+    leaderId: leaderId || undefined,
+    members: leaderId ? [leaderId] : [],
+  });
+};
 
-  async createTeam(organizationId, name, description, leaderId) {
-    return this.teamRepo.create({
-      name,
-      description,
-      organizationId: new mongoose.Types.ObjectId(organizationId),
-      ...(leaderId ? { leaderId: new mongoose.Types.ObjectId(leaderId) } : {}),
-      ...(leaderId ? { members: [new mongoose.Types.ObjectId(leaderId)] } : { members: [] }),
-    });
-  }
+const getTeamById = async (id) => {
+  const team = await TeamModel.findById(id)
+    .populate('leaderId', 'name email role')
+    .populate('members', 'name email role');
 
-  async getTeamById(id) {
-    const team = await this.teamRepo.findById(id);
-    if (!team) {
-      const error = new Error('Team not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return team;
+  if (!team) {
+    throw AppError.notFound('Team not found');
   }
+  return team;
+};
 
-  async getOrganizationTeams(organizationId) {
-    return this.teamRepo.findByOrganization(organizationId);
-  }
+const getOrganizationTeams = async (organizationId) => {
+  return TeamModel.find({ organizationId })
+    .populate('leaderId', 'name email role')
+    .populate('members', 'name email role');
+};
 
-  async updateTeam(id, updateData) {
-    const updated = await this.teamRepo.update(id, updateData);
-    if (!updated) {
-      const error = new Error('Team not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return updated;
+const updateTeam = async (id, updateData) => {
+  const updated = await TeamModel.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updated) {
+    throw AppError.notFound('Team not found');
   }
+  return updated;
+};
 
-  async addMemberToTeam(teamId, userId) {
-    const updated = await this.teamRepo.addMember(teamId, userId);
-    if (!updated) {
-      const error = new Error('Team not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return updated;
+const addMemberToTeam = async (teamId, userId) => {
+  const updated = await TeamModel.findByIdAndUpdate(
+    teamId,
+    { $addToSet: { members: userId } },
+    { new: true }
+  );
+  if (!updated) {
+    throw AppError.notFound('Team not found');
   }
+  return updated;
+};
 
-  async removeMemberFromTeam(teamId, userId) {
-    const updated = await this.teamRepo.removeMember(teamId, userId);
-    if (!updated) {
-      const error = new Error('Team not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return updated;
+const removeMemberFromTeam = async (teamId, userId) => {
+  const updated = await TeamModel.findByIdAndUpdate(
+    teamId,
+    { $pull: { members: userId } },
+    { new: true }
+  );
+  if (!updated) {
+    throw AppError.notFound('Team not found');
   }
+  return updated;
+};
 
-  async deleteTeam(id) {
-    const deleted = await this.teamRepo.delete(id);
-    if (!deleted) {
-      const error = new Error('Team not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return { message: 'Team deleted successfully' };
+const deleteTeam = async (id) => {
+  const deleted = await TeamModel.findByIdAndDelete(id);
+  if (!deleted) {
+    throw AppError.notFound('Team not found');
   }
-}
+  return { message: 'Team deleted successfully' };
+};
 
 module.exports = {
-  TeamService,
-  teamService: new TeamService(),
+  createTeam,
+  getTeamById,
+  getOrganizationTeams,
+  updateTeam,
+  addMemberToTeam,
+  removeMemberFromTeam,
+  deleteTeam,
 };

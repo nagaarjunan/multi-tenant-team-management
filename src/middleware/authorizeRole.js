@@ -1,17 +1,15 @@
+const AppError = require('../utils/AppError');
+
 const authorizeRole = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized: Authentication required.',
-      });
+      return next(AppError.unauthorized('Authentication required to perform this action.'));
     }
 
     if (!req.user.role || !allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Forbidden: You do not have permission to perform this action.',
-      });
+      return next(
+        AppError.forbidden(`Forbidden: Access requires one of [${allowedRoles.join(', ')}] role.`)
+      );
     }
 
     next();

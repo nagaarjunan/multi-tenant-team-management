@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const AppError = require('../utils/AppError');
 
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -13,10 +14,7 @@ const authenticate = (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. No authentication token provided in cookie or header.',
-    });
+    return next(AppError.unauthorized('Access denied. No authentication token provided.'));
   }
 
   const secret = process.env.JWT_SECRET || 'default_jwt_secret_key';
@@ -26,10 +24,7 @@ const authenticate = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired token.',
-    });
+    next(AppError.unauthorized('Invalid or expired authentication token.'));
   }
 };
 

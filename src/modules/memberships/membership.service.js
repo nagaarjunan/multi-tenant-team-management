@@ -1,56 +1,47 @@
-const mongoose = require('mongoose');
-const { membershipRepository } = require('./membership.repository');
+const { MembershipModel } = require('./membership.model');
+const AppError = require('../../utils/AppError');
 
-class MembershipService {
-  constructor(memberRepo = membershipRepository) {
-    this.memberRepo = memberRepo;
+const addMember = async (userId, organizationId, role = 'member') => {
+  const existing = await MembershipModel.findOne({ userId, organizationId });
+  if (existing) {
+    throw AppError.conflict('User is already a member of this organization');
   }
 
-  async addMember(userId, organizationId, role = 'member') {
-    const existing = await this.memberRepo.findByUserAndOrg(userId, organizationId);
-    if (existing) {
-      const error = new Error('User is already a member of this organization');
-      error.statusCode = 409;
-      throw error;
-    }
+  return MembershipModel.create({
+    userId,
+    organizationId,
+    role,
+  });
+};
 
-    return this.memberRepo.create({
-      userId: new mongoose.Types.ObjectId(userId),
-      organizationId: new mongoose.Types.ObjectId(organizationId),
-      role,
-    });
-  }
+const getOrganizationMembers = async (organizationId) => {
+  return MembershipModel.find({ organizationId }).populate('userId', 'name email role');
+};
 
-  async getOrganizationMembers(organizationId) {
-    return this.memberRepo.findByOrganization(organizationId);
-  }
+const getUserMemberships = async (userId) => {
+  return MembershipModel.find({ userId }).populate('organizationId', 'name slug');
+};
 
-  async getUserMemberships(userId) {
-    return this.memberRepo.findByUser(userId);
+const updateMemberRole = async (id, role) => {
+  const updated = await MembershipModel.findByIdAndUpdate(id, { role }, { new: true });
+  if (!updated) {
+    throw AppError.notFound('Membership not found');
   }
+  return updated;
+};
 
-  async updateMemberRole(id, role) {
-    const updated = await this.memberRepo.updateRole(id, role);
-    if (!updated) {
-      const error = new Error('Membership not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return updated;
+const removeMember = async (id) => {
+  const deleted = await MembershipModel.findByIdAndDelete(id);
+  if (!deleted) {
+    throw AppError.notFound('Membership not found');
   }
-
-  async removeMember(id) {
-    const deleted = await this.memberRepo.delete(id);
-    if (!deleted) {
-      const error = new Error('Membership not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return { message: 'Member removed successfully' };
-  }
-}
+  return { message: 'Member removed successfully' };
+};
 
 module.exports = {
-  MembershipService,
-  membershipService: new MembershipService(),
+  addMember,
+  getOrganizationMembers,
+  getUserMemberships,
+  updateMemberRole,
+  removeMember,
 };

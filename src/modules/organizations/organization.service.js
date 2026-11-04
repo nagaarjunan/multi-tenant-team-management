@@ -1,83 +1,80 @@
-const mongoose = require('mongoose');
-const { organizationRepository } = require('./organization.repository');
-const { membershipRepository } = require('../memberships/membership.repository');
+const { OrganizationModel } = require('./organization.model');
+const { MembershipModel } = require('../memberships/membership.model');
+const AppError = require('../../utils/AppError');
 
-class OrganizationService {
-  constructor(
-    orgRepo = organizationRepository,
-    membershipRepo = membershipRepository
-  ) {
-    this.orgRepo = orgRepo;
-    this.membershipRepo = membershipRepo;
+const createOrganization = async (userId, data) => {
+  const slug =
+    data.slug ||
+    data.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+  const existing = await OrganizationModel.findOne({ slug });
+  if (existing) {
+    throw AppError.conflict('Organization slug already exists');
   }
 
-  async createOrganization(userId, data) {
-    const slug = data.slug || data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-    const existing = await this.orgRepo.findBySlug(slug);
-    if (existing) {
-      const error = new Error('Organization slug already exists');
-      error.statusCode = 409;
-      throw error;
-    }
+  // 1. Create Organization
+  const org = await OrganizationModel.create({
+    name: data.name,
+    slug,
+    description: data.description,
+    ownerId: userId,
+  });
 
-    // 1. Create Organization with ownerId
-    const org = await this.orgRepo.create({
-      name: data.name,
-      slug,
-      description: data.description,
-      ownerId: new mongoose.Types.ObjectId(userId),
-    });
+  // 2. Automatically grant creator owner membership
+  await MembershipModel.create({
+    userId,
+    organizationId: org._id,
+    role: 'owner',
+  });
 
-    // 2. Automatically grant the creator the 'owner' membership role in this organization
-    await this.membershipRepo.create({
-      userId: new mongoose.Types.ObjectId(userId),
-      organizationId: org._id,
-      role: 'owner',
-    });
+  return org;
+};
 
-    return org;
+const getOrganizationById = async (id) => {
+  const org = await OrganizationModel.findById(id);
+  if (!org) {
+    throw AppError.notFound('Organization not found');
   }
+  return org;
+};
 
-  async getOrganizationById(id) {
-    const org = await this.orgRepo.findById(id);
-    if (!org) {
-      const error = new Error('Organization not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return org;
-  }
+const getAllOrganizations = async () => {
+  return OrganizationModel.find();
+};
 
-  async getAllOrganizations() {
-    return this.orgRepo.findAll();
-  }
+const getUserOrganizations = async (userId) => {
+  return OrganizationModel.find({ ownerId: userId });
+};
 
-  async getUserOrganizations(userId) {
-    return this.orgRepo.findByOwnerId(userId);
+const updateOrganization = async (id, updateData) => {
+  const updated = await OrganizationModel.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updated) {
+    throw AppError.notFound('Organization not found');
   }
+  return updated;
+};
 
-  async updateOrganization(id, updateData) {
-    const updated = await this.orgRepo.update(id, updateData);
-    if (!updated) {
-      const error = new Error('Organization not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return updated;
+const deleteOrganization = async (id) => {
+  const deleted = await OrganizationModel.findByIdAndDelete(id);
+  if (!deleted) {
+    throw AppError.notFound('Organization not found');
   }
-
-  async deleteOrganization(id) {
-    const deleted = await this.orgRepo.delete(id);
-    if (!deleted) {
-      const error = new Error('Organization not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return { message: 'Organization deleted successfully' };
-  }
-}
+  // Clean up associated memberships
+  await MembershipModel.deleteMany({ organizationId: id });
+  return { message: 'Organization deleted successfully' };
+};
 
 module.exports = {
-  OrganizationService,
-  organizationService: new OrganizationService(),
+  createOrganization,
+  getOrganizationById,
+  getAllOrganizations,
+  getUserOrganizations,
+  updateOrganization,
+  deleteOrganization,
 };

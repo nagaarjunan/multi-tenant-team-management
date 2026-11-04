@@ -1,46 +1,44 @@
-const { userRepository } = require('./user.repository');
+const { UserModel } = require('./user.model');
+const AppError = require('../../utils/AppError');
 
-class UserService {
-  constructor(userRepo = userRepository) {
-    this.userRepo = userRepo;
+const getUserById = async (id) => {
+  const user = await UserModel.findById(id);
+  if (!user) {
+    throw AppError.notFound('User not found');
   }
+  return user;
+};
 
-  async getUserById(id) {
-    const user = await this.userRepo.findById(id);
-    if (!user) {
-      const error = new Error('User not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return user;
-  }
+const getAllUsers = async () => {
+  return UserModel.find();
+};
 
-  async getAllUsers() {
-    return this.userRepo.findAll();
-  }
+const updateUser = async (id, updateData) => {
+  const safeData = { ...updateData };
+  delete safeData.password;
 
-  async updateUser(id, updateData) {
-    const updatedUser = await this.userRepo.update(id, updateData);
-    if (!updatedUser) {
-      const error = new Error('User not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return updatedUser;
-  }
+  const user = await UserModel.findByIdAndUpdate(id, safeData, {
+    new: true,
+    runValidators: true,
+  });
 
-  async deleteUser(id) {
-    const deleted = await this.userRepo.delete(id);
-    if (!deleted) {
-      const error = new Error('User not found');
-      error.statusCode = 404;
-      throw error;
-    }
-    return { message: 'User deleted successfully' };
+  if (!user) {
+    throw AppError.notFound('User not found');
   }
-}
+  return user;
+};
+
+const deleteUser = async (id) => {
+  const deleted = await UserModel.findByIdAndDelete(id);
+  if (!deleted) {
+    throw AppError.notFound('User not found');
+  }
+  return { message: 'User deleted successfully' };
+};
 
 module.exports = {
-  UserService,
-  userService: new UserService(),
+  getUserById,
+  getAllUsers,
+  updateUser,
+  deleteUser,
 };

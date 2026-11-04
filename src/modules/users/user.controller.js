@@ -1,65 +1,58 @@
-const { userService } = require('./user.service');
+const userService = require('./user.service');
 
-class UserController {
-  constructor(userSvc = userService) {
-    this.userSvc = userSvc;
+const getUserProfile = async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    const user = await userService.getUserById(userId);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
   }
+};
 
-  getUserProfile = async (req, res, next) => {
-    try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
-      }
+const getUserById = async (req, res, next) => {
+  try {
+    const user = await userService.getUserById(req.params.id);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      const user = await this.userSvc.getUserById(userId);
-      res.status(200).json({ success: true, data: user });
-    } catch (error) {
-      next(error);
-    }
-  };
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await userService.getAllUsers();
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
+};
 
-  getUserById = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const user = await this.userSvc.getUserById(id);
-      res.status(200).json({ success: true, data: user });
-    } catch (error) {
-      next(error);
-    }
-  };
+const updateUser = async (req, res, next) => {
+  try {
+    const updatedUser = await userService.updateUser(req.params.id, req.body);
+    res.status(200).json({ success: true, data: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+};
 
-  getAllUsers = async (req, res, next) => {
-    try {
-      const users = await this.userSvc.getAllUsers();
-      res.status(200).json({ success: true, data: users });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  updateUser = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const updatedUser = await this.userSvc.updateUser(id, req.body);
-      res.status(200).json({ success: true, data: updatedUser });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  deleteUser = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-      const result = await this.userSvc.deleteUser(id);
-      res.status(200).json({ success: true, ...result });
-    } catch (error) {
-      next(error);
-    }
-  };
-}
+const deleteUser = async (req, res, next) => {
+  try {
+    const result = await userService.deleteUser(req.params.id);
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
-  UserController,
-  userController: new UserController(),
+  getUserProfile,
+  getUserById,
+  getAllUsers,
+  updateUser,
+  deleteUser,
 };
