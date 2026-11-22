@@ -15,17 +15,17 @@ const AccountDropdown = observer(function AccountDropdown() {
 	const { replace } = useRouter();
 	const { user: saasUser } = useAuthorization();
 	const { username: fallbackUsername, email: fallbackEmail, avatar: fallbackAvatar } = useUserInfo();
-	const { clearUserInfoAndToken } = useUserActions();
+	const { logout: logoutAction } = useUserActions();
 	const { backToLogin } = useLoginStateContext();
 	const { t } = useTranslation();
 
-	const displayName = saasUser?.name || fallbackUsername;
-	const displayEmail = saasUser?.email || fallbackEmail;
-	const displayAvatar = saasUser?.avatar || fallbackAvatar;
+	const displayName = fallbackUsername || saasUser?.name || "User";
+	const displayEmail = fallbackEmail || saasUser?.email || "";
+	const displayAvatar = fallbackAvatar || saasUser?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${displayName}`;
 
-	const logout = () => {
+	const logout = async () => {
 		try {
-			clearUserInfoAndToken();
+			await logoutAction();
 			backToLogin();
 		} catch (error) {
 			console.log(error);

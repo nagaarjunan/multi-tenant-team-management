@@ -43,10 +43,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 				description: "Successfully signed in to your workspace.",
 				closeButton: true,
 			});
-		} catch (error: any) {
-			toast.error("Failed to sign in", {
-				description: error?.message || "Please check your credentials and try again.",
-			});
+		} catch {
+			// Error notification is handled centrally by apiClient
 		} finally {
 			setLoading(false);
 		}

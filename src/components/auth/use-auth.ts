@@ -25,9 +25,9 @@ export const useAuthCheck = (baseOn: "role" | "permission" = "permission") => {
 			if (role === item) return true;
 		}
 
-		// 2. Fallback to legacy userStore permissions if accessToken exists
-		if (accessToken) {
-			const resourcePool = baseOn === "role" ? roles : permissions;
+		// 2. Fallback to userStore permissions or roles
+		const resourcePool = baseOn === "role" ? roles : permissions;
+		if (resourcePool && resourcePool.length > 0) {
 			return resourcePool.some((p) => p.code === item);
 		}
 

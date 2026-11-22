@@ -27,20 +27,28 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
 	(res: AxiosResponse<Result<any>>) => {
 		if (!res.data) throw new Error(t("sys.api.apiRequestFailed"));
-		const { status, data, message } = res.data;
-		if (status === ResultStatus.SUCCESS) {
-			return data;
+		const { status, data, message, success } = res.data as any;
+		if (status === ResultStatus.SUCCESS || success === true || (res.status >= 200 && res.status < 300 && status === undefined)) {
+			return data !== undefined ? data : res.data;
 		}
-		throw new Error(message || t("sys.api.apiRequestFailed"));
+		const errMsg = message || t("sys.api.apiRequestFailed");
+		toast.error(errMsg, { id: "api-error" });
+		throw new Error(errMsg);
 	},
 	(error: AxiosError<Result>) => {
-		const { response, message } = error || {};
+		const { response, message, config } = error || {};
 		const errMsg = response?.data?.message || message || t("sys.api.errorMessage");
-		toast.error(errMsg, { position: "top-center" });
+		const isSilentCheck = config?.url?.includes("/auth/me");
+		if (!isSilentCheck) {
+			toast.error(errMsg, { id: "api-error" });
+		}
 		if (response?.status === 401) {
 			userStore.getState().actions.clearUserInfoAndToken();
+			if (!isSilentCheck && !window.location.pathname.startsWith("/auth/")) {
+				window.location.href = "/auth/login";
+			}
 		}
-		return Promise.reject(error);
+		return Promise.reject(new Error(errMsg));
 	},
 );
 

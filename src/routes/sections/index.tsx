@@ -11,5 +11,5 @@ export const routesSection: RouteObject[] = [
 	// Main
 	...mainRoutes,
 	// No Match
-	{ path: "*", element: <Navigate to="/blank" replace /> },
+	{ path: "*", element: <Navigate to="/dashboard" replace /> },
 ];

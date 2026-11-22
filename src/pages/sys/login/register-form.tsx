@@ -79,10 +79,8 @@ export function RegisterForm() {
 				description: `Welcome to Nexus, ${values.username}. Please sign in to continue.`,
 			});
 			backToLogin();
-		} catch (error: any) {
-			toast.error("Registration failed", {
-				description: error?.message || "An error occurred while creating your account.",
-			});
+		} catch {
+			// Error notification is handled centrally by apiClient
 		}
 	};
 

@@ -2,7 +2,7 @@ import LocalePicker from "@/components/locale-picker";
 import Logo from "@/components/logo";
 import { GLOBAL_CONFIG } from "@/global-config";
 import SettingButton from "@/layouts/components/setting-button";
-import { useUserToken } from "@/store/userStore";
+import { useUserInfo } from "@/store/userStore";
 import { Navigate } from "react-router";
 import AuthShowcase from "./components/auth-showcase";
 import LoginForm from "./login-form";
@@ -11,9 +11,9 @@ import RegisterForm from "./register-form";
 import ResetForm from "./reset-form";
 
 function LoginPage() {
-	const token = useUserToken();
+	const userInfo = useUserInfo();
 
-	if (token.accessToken) {
+	if (userInfo?.id) {
 		return <Navigate to={GLOBAL_CONFIG.defaultRoute} replace />;
 	}
 
